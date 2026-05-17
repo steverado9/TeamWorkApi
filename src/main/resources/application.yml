@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: TeamWorkApi
+  datasource:
+    url: jdbc:mysql://localhost:3306/twApi_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false
+    username: root
+    password: 12345
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+    hibernate:
+        ddl-auto: create
