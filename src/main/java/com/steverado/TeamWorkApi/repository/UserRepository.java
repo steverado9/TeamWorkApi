@@ -19,7 +19,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Transactional
     @Query(value = """
             INSERT INTO users (first_name, last_name, email, password, gender, job_role, department, address, created_at)
-            VALUES (:firstName, :lastName, :email, :password, :gender, :jobRole, :department, :address, :createdAt)
+            VALUES (:firstName, :lastName, :email, :password, :gender, :jobRole, :department, :address, CURRENT_TIMESTAMP)
             """, nativeQuery = true)
     void saveUser(
             @Param("firstName") String firstName,
@@ -29,8 +29,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("gender") String gender,
             @Param("jobRole") Role jobRole,
             @Param("department") String department,
-            @Param("address")String address,
-            @Param("createdAt") LocalDateTime createdAt
+            @Param("address")String address
     );
 
     @Query(value = "SELECT * FROM users WHERE email = :email", nativeQuery = true)

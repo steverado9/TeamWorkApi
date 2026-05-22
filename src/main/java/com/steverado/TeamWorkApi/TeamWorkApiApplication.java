@@ -31,7 +31,7 @@ public class TeamWorkApiApplication implements CommandLineRunner {
 					"Stephen", "Isaac", "isaac.stephen@example.com", encodedPassword,
 					"Male", Role.ADMIN, "Engineering", "7 Adekoya Street, Lagos, Nigeria"
 			);
-			userRepository.saveUser(user1.getFirstName(), user1.getLastName(), user1.getEmail(), user1.getPassword(), user1.getGender(), user1.getJobRole(), user1.getDepartment(), user1.getAddress(), user1.getCreatedAt());
+			userRepository.saveUser(user1.getFirstName(), user1.getLastName(), user1.getEmail(), user1.getPassword(), user1.getGender(), user1.getJobRole(), user1.getDepartment(), user1.getAddress());
 			System.out.println("Default admin created successfully.");
 		} else {
 			System.out.println("Admin user already exists.");

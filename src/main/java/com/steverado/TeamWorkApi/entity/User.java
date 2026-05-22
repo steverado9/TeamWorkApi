@@ -58,7 +58,6 @@ public class User implements UserDetails {
         this.jobRole = jobRole;
         this.department = department;
         this.address = address;
-        this.createdAt = LocalDateTime.now();
     }
 
     @Override
