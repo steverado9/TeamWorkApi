@@ -4,8 +4,7 @@ import com.steverado.TeamWorkApi.dtos.LoginUserDto;
 import com.steverado.TeamWorkApi.dtos.RegisterUserDto;
 import com.steverado.TeamWorkApi.entity.User;
 import com.steverado.TeamWorkApi.response.ApiResponse;
-import com.steverado.TeamWorkApi.response.LoginData;
-import com.steverado.TeamWorkApi.response.LoginResponse;
+import com.steverado.TeamWorkApi.response.DataResponse;
 import com.steverado.TeamWorkApi.service.AuthenticationService;
 import com.steverado.TeamWorkApi.service.JwtService;
 import org.springframework.http.ResponseEntity;
@@ -34,17 +33,17 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginData>> authenticate(@RequestBody LoginUserDto loginUserDto) {
+    public ResponseEntity<ApiResponse<DataResponse>> authenticate(@RequestBody LoginUserDto loginUserDto) {
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
 
         String jwtToken = jwtService.generateToken(authenticatedUser);
 
-        LoginData data = new LoginData();
+        DataResponse data = new DataResponse();
         data.setToken(jwtToken);
         data.setExpiresIn(jwtService.getExpirationTime());
         data.setUserId(authenticatedUser.getId());
 
-        ApiResponse<LoginData> response = new ApiResponse<>("success", data);
+        ApiResponse<DataResponse> response = new ApiResponse<>("success", data);
 
         return ResponseEntity.ok(response);
     }

@@ -1,10 +1,12 @@
 package com.steverado.TeamWorkApi.response;
 
-public class LoginData {
+public class DataResponse {
 
     private String token;
-    private Long expiresIn;
+    private String message;
     private Long userId;
+    private Long expiresIn;
+
 
     public String getToken() {
         return token;
@@ -28,5 +30,13 @@ public class LoginData {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }
