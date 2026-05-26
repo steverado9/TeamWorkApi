@@ -1,10 +1,6 @@
 package com.steverado.TeamWorkApi.dtos;
 
 import com.steverado.TeamWorkApi.enums.Role;
-import jakarta.persistence.Column;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
 
 public class RegisterUserDto {
 
@@ -18,7 +14,7 @@ public class RegisterUserDto {
 
     private String gender;
 
-    private Role jobRole;
+    private Role role;
 
     private String department;
 
@@ -64,12 +60,12 @@ public class RegisterUserDto {
         this.gender = gender;
     }
 
-    public Role getJobRole() {
-        return jobRole;
+    public Role getRole() {
+        return role;
     }
 
-    public void setJobRole(Role jobRole) {
-        this.jobRole = jobRole;
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     public String getDepartment() {

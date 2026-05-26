@@ -4,6 +4,7 @@ import com.steverado.TeamWorkApi.enums.Role;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
@@ -33,8 +34,9 @@ public class User implements UserDetails {
     @Column(name = "gender", nullable = false)
     private String gender;
 
-    @Column(name = "job_role", nullable = false)
-    private Role jobRole;
+    @Column(name = "role", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @Column(name = "department", nullable = false)
     private String department;
@@ -49,20 +51,22 @@ public class User implements UserDetails {
     public User() {
     }
 
-    public User(String firstName, String lastName, String email, String password, String gender, Role jobRole, String department, String address) {
+    public User(String firstName, String lastName, String email, String password, String gender, Role role, String department, String address) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = password;
         this.gender = gender;
-        this.jobRole = jobRole;
+        this.role = role;
         this.department = department;
         this.address = address;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return List.of(
+                new SimpleGrantedAuthority("ROLE_" + role.name())
+        );
     }
 
     public String getPassword() {
@@ -138,12 +142,12 @@ public class User implements UserDetails {
         this.gender = gender;
     }
 
-    public Role getJobRole() {
-        return jobRole;
+    public Role getRole() {
+        return role;
     }
 
-    public void setJobRole(Role jobRole) {
-        this.jobRole = jobRole;
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     public String getDepartment() {

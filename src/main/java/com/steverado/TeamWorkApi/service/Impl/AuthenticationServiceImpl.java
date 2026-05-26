@@ -33,7 +33,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         user.setLastName(input.getLastName());
         user.setEmail(input.getEmail());
         user.setPassword(passwordEncoder.encode(input.getPassword()));
-        user.setJobRole(input.getJobRole());
+        user.setRole(input.getRole());
         user.setGender(input.getGender());
         user.setAddress(input.getAddress());
         user.setDepartment(input.getDepartment());
@@ -44,7 +44,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 user.getEmail(),
                 user.getPassword(),
                 user.getGender(),
-                user.getJobRole(),
+                user.getRole().name(),
                 user.getDepartment(),
                 user.getAddress()
         );
