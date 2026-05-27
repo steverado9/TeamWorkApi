@@ -20,9 +20,9 @@ public class Article {
     private String content;
 
     //Many articles can belong to one user
-//    @ManyToOne(fetch = FetchType.LAZY) //lazy = load user only when needed
-//    @JoinColumn(name = "user_id", nullable = false)
-//    private User user;
+    @ManyToOne(fetch = FetchType.LAZY) //lazy = load user only when needed
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
@@ -60,13 +60,13 @@ public class Article {
         this.content = content;
     }
 
-//    public User getUser() {
-//        return user;
-//    }
+    public User getUser() {
+        return user;
+    }
 
-//    public void setUser(User user) {
-//        this.user = user;
-//    }
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;

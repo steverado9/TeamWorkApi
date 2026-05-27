@@ -41,7 +41,9 @@ public class AuthenticationController {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        User currentUser = (User) authentication.getPrincipal();
+        String email = authentication.getName();
+
+        User currentUser = userService.findUserByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
 
         if (currentUser.getRole() != Role.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -49,11 +51,8 @@ public class AuthenticationController {
 
         User registeredUser = authenticationService.signup(registerUserDto);
 
-        String jwtToken = jwtService.generateToken(registeredUser);
-
         DataCreateUserResponse data = new DataCreateUserResponse();
         data.setMessage("User account successfully created");
-        data.setToken(jwtToken);
         data.setUserId(registeredUser.getId());
         data.setExpiresIn(jwtService.getExpirationTime());
 

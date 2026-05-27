@@ -32,7 +32,6 @@ public class SecurityConfiguration {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/auth/login").permitAll()
-                        .requestMatchers("/auth/signup").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(Customizer -> Customizer
