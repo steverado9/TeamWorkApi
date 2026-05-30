@@ -43,4 +43,9 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
             @Param("title") String title,
             @Param("content") String content,
             @Param("id") Long id);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM articles WHERE id = :articleId", nativeQuery = true)
+    void deleteArticleById(@Param("articleId") Long articleId);
 }

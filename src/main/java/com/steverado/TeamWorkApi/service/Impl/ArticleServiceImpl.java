@@ -5,8 +5,7 @@ import com.steverado.TeamWorkApi.entity.Article;
 import com.steverado.TeamWorkApi.entity.User;
 import com.steverado.TeamWorkApi.enums.Role;
 import com.steverado.TeamWorkApi.repository.ArticleRepository;
-import com.steverado.TeamWorkApi.response.ApiResponse;
-import com.steverado.TeamWorkApi.response.UpdateArticleDataResponse;
+import com.steverado.TeamWorkApi.response.*;
 import com.steverado.TeamWorkApi.service.ArticleService;
 import com.steverado.TeamWorkApi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,25 +27,48 @@ public class ArticleServiceImpl implements ArticleService {
     private ArticleRepository articleRepository;
 
     @Override
-    public Optional<Article> saveArticle(ArticleDto articleDto, User user) {
+    public ResponseEntity<ArticleResponse<DataArticleResponse>> saveArticle(ArticleDto articleDto) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        Optional<User> currentUser = userService.findUserByEmail(email);
+
+        if (currentUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
 
         Article article = new Article();
         article.setTitle(articleDto.getTitle());
         article.setContent(articleDto.getContent());
-        article.setUser(user);
+        article.setUser(currentUser.get());
         articleRepository.saveArticle(article.getTitle(), article.getContent(), article.getUser().getId());
 
-        return articleRepository.findArticleByUserId(article.getUser().getId());
+        Optional<Article> savedArticle = articleRepository.findArticleByUserId(currentUser.get().getId());
+
+        DataArticleResponse data = new DataArticleResponse();
+        data.setMessage("Article successfully posted");
+        if (savedArticle.isPresent()) {
+            data.setArticleId(savedArticle.get().getId());
+            data.setCreatedOn(savedArticle.get().getCreatedAt());
+        }
+        data.setTitle(article.getTitle());
+
+        ArticleResponse<DataArticleResponse> response = new ArticleResponse<>(article.getTitle(), article.getContent(), "success", data);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+
+    @Override
+    public Optional<Article> getArticleById(Long articleId) {
+        return articleRepository.findByArticleId(articleId);
     }
 
     @Override
     public Optional<Article> findArticleByUserId(Long userId) {
         return articleRepository.findArticleByUserId(userId);
-    }
-
-    @Override
-    public Optional<Article> getArticleById(Long articleId) {
-        return articleRepository.findByArticleId(articleId);
     }
 
     @Override
@@ -85,6 +107,18 @@ public class ArticleServiceImpl implements ArticleService {
         data.setArticle(existingArticle.get().getContent());
 
         ApiResponse<UpdateArticleDataResponse> response = new ApiResponse<UpdateArticleDataResponse>("Success", data);
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<DeleteDataResponse>> deleteArticle(Long articleId) {
+
+        articleRepository.deleteArticleById(articleId);
+        DeleteDataResponse data = new DeleteDataResponse();
+        data.setMessage("Article successfully deleted");
+
+        ApiResponse<DeleteDataResponse> response = new ApiResponse<>("Success", data);
+
         return ResponseEntity.ok(response);
     }
 }
