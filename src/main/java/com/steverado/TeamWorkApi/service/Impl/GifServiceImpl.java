@@ -1,8 +1,10 @@
 package com.steverado.TeamWorkApi.service.Impl;
 
 import com.steverado.TeamWorkApi.dtos.GifDto;
+import com.steverado.TeamWorkApi.entity.Article;
 import com.steverado.TeamWorkApi.entity.Gif;
 import com.steverado.TeamWorkApi.entity.User;
+import com.steverado.TeamWorkApi.enums.Role;
 import com.steverado.TeamWorkApi.repository.GifRepository;
 import com.steverado.TeamWorkApi.response.ApiResponse;
 import com.steverado.TeamWorkApi.response.DataGifResponse;
@@ -16,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -60,13 +63,36 @@ public class GifServiceImpl implements GifService {
         data.setTitle(gif.getTitle());
         data.setImageUrl(gif.getImageUrl());
 
-        ApiResponse<DataGifResponse> response = new ApiResponse<DataGifResponse>();
+        ApiResponse<DataGifResponse> response = new ApiResponse<DataGifResponse>("Success", data);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Override
     public ResponseEntity<ApiResponse<DeleteDataResponse>> deleteGifById(Long id) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        Optional<User> currentUser = userService.findUserByEmail(email);
+
+        if (currentUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        //get existing gif with id
+        Optional<Gif> existingGif = getGifById(id);
+        if (existingGif.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        //get user that created the gif
+        User gifUser = existingGif.get().getUser();
+
+        if (currentUser.get().getRole() != Role.ADMIN && currentUser.get() != gifUser) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
         gifRepository.deleteGifById(id);
 
@@ -76,5 +102,15 @@ public class GifServiceImpl implements GifService {
         ApiResponse<DeleteDataResponse> response = new ApiResponse<>("Success", data);
 
         return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public Optional<Gif> getGifById(Long id) {
+        return gifRepository.findGifById(id);
+    }
+
+    @Override
+    public List<Gif> getAllGifs() {
+        return gifRepository.findAllGifs();
     }
 }

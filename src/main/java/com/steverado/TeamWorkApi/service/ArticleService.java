@@ -5,6 +5,7 @@ import com.steverado.TeamWorkApi.entity.Article;
 import com.steverado.TeamWorkApi.response.*;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ArticleService {
@@ -17,4 +18,6 @@ public interface ArticleService {
     ResponseEntity<ApiResponse<UpdateArticleDataResponse>> updateArticle(Long articleId, Article article);
 
     ResponseEntity<ApiResponse<DeleteDataResponse>> deleteArticle(Long articleId);
+
+    List<Article> getAllArticles();
 }

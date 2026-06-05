@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -113,6 +114,29 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public ResponseEntity<ApiResponse<DeleteDataResponse>> deleteArticle(Long articleId) {
 
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        Optional<User> currentUser = userService.findUserByEmail(email);
+
+        if (currentUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        //get existing article with id
+        Optional<Article> existingArticle = getArticleById(articleId);
+        if (existingArticle.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        //get user that created the article
+        User articleUser = existingArticle.get().getUser();
+
+        if (currentUser.get().getRole() != Role.ADMIN && currentUser.get() != articleUser) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         articleRepository.deleteArticleById(articleId);
         DeleteDataResponse data = new DeleteDataResponse();
         data.setMessage("Article successfully deleted");
@@ -120,5 +144,10 @@ public class ArticleServiceImpl implements ArticleService {
         ApiResponse<DeleteDataResponse> response = new ApiResponse<>("Success", data);
 
         return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public List<Article> getAllArticles() {
+        return articleRepository.findAllArticles();
     }
 }

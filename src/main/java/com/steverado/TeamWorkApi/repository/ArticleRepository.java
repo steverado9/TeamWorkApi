@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -26,7 +27,13 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
             @Param("userId") Long userId
     );
 
-    @Query(value = "SELECT * FROM articles WHERE user_id = :userId", nativeQuery = true)
+    //The highest ID is usually the newest record.
+    @Query(value = """
+            SELECT * FROM articles
+            WHERE user_id = :userId
+            ORDER BY id DESC
+            LIMIT 1
+            """, nativeQuery = true)
     Optional<Article> findArticleByUserId(@Param("userId") Long userId);
 
     @Query(value = "SELECT * FROM articles WHERE id = :articleId", nativeQuery = true)
@@ -35,7 +42,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     @Modifying
     @Transactional
     @Query(value = """
-            UPDATE articles 
+            UPDATE articles
             SET title = :title, content = :content, created_at = CURRENT_TIMESTAMP
             WHERE id = :id
             """ , nativeQuery = true)
@@ -48,4 +55,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     @Modifying
     @Query(value = "DELETE FROM articles WHERE id = :articleId", nativeQuery = true)
     void deleteArticleById(@Param("articleId") Long articleId);
+
+    @Query(value = "SELECT * FROM articles", nativeQuery = true)
+    List<Article> findAllArticles();
 }

@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface GifRepository extends JpaRepository<Gif, Long> {
@@ -23,13 +24,25 @@ public interface GifRepository extends JpaRepository<Gif, Long> {
     void saveGif(
             @Param("imageUrl") String imageUrl,
             @Param("title") String title,
-            @Param("userid") Long userid);
+            @Param("userId") Long userId);
 
-    @Query(value = "SELECT * FROM gifs WHERE user_id = userId", nativeQuery = true)
+    //The highest ID is usually the newest record.
+    @Query(value = """
+            SELECT * FROM gifs
+            WHERE user_id = :userId
+            ORDER BY id DESC
+            LIMIT 1
+            """, nativeQuery = true)
     Optional<Gif> findGifByUserId(@Param("userId") Long userId);
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE * FROM gifs WHERE id = :gifId", nativeQuery = true)
+    @Query(value = "DELETE FROM gifs WHERE id = :gifId", nativeQuery = true)
     void deleteGifById(@Param("gifId") Long gifId);
+
+    @Query(value = "SELECT * FROM gifs WHERE id = :gifId", nativeQuery = true)
+    Optional<Gif> findGifById(@Param("gifId") Long gifId);
+
+    @Query(value = "SELECT * FROM gifs", nativeQuery = true)
+    List<Gif> findAllGifs();
 }
