@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -72,5 +73,10 @@ public class ArticleCommentServiceImpl implements ArticleCommentService {
 
         ApiResponse<DataArticleCommentResponse> response = new ApiResponse<DataArticleCommentResponse>("success", data);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Override
+    public List<ArticleComment> getAllCommentsByArticleId(Long articleId) {
+        return articleCommentRepository.getAllCommentsByArticleId(articleId);
     }
 }

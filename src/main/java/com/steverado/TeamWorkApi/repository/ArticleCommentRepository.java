@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -31,4 +32,11 @@ public interface ArticleCommentRepository extends JpaRepository<ArticleComment, 
             LIMIT 1
             """, nativeQuery = true)
     Optional<ArticleComment> getArticleCommentByArticleId(@Param("articleId") Long articleId);
+
+    @Query(value = """
+            SELECT * FROM article_comments
+            WHERE article_id = :articleId
+            ORDER BY created_at DESC
+            """, nativeQuery = true)
+    List<ArticleComment> getAllCommentsByArticleId(@Param("articleId") Long articleId);
 }

@@ -1,13 +1,25 @@
-package com.steverado.TeamWorkApi.response;
+package com.steverado.TeamWorkApi.dtos;
 
 import java.time.LocalDateTime;
 
-public class DataFeedResponse {
+public class FeedItemDto {
+
     private Long id;
-    private LocalDateTime createdOn;
     private String title;
     private String content;
+    private LocalDateTime createdOn;
     private Long authorId;
+
+    public FeedItemDto() {
+    }
+
+    public FeedItemDto(Long id, String title, String content, LocalDateTime createdOn, Long authorId) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.createdOn = createdOn;
+        this.authorId = authorId;
+    }
 
     public Long getId() {
         return id;

@@ -1,5 +1,6 @@
 package com.steverado.TeamWorkApi.service;
 
+import com.steverado.TeamWorkApi.dtos.ArticleCommentItemsDto;
 import com.steverado.TeamWorkApi.dtos.ArticleDto;
 import com.steverado.TeamWorkApi.entity.Article;
 import com.steverado.TeamWorkApi.response.*;
@@ -20,4 +21,6 @@ public interface ArticleService {
     ResponseEntity<ApiResponse<DeleteDataResponse>> deleteArticle(Long articleId);
 
     List<Article> getAllArticles();
+
+    ResponseEntity<ApiResponse<DataViewArticleResponse<List<ArticleCommentItemsDto>>>> getArticleAndCommentById(Long articleId);
 }

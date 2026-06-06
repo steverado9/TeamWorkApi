@@ -1,11 +1,15 @@
 package com.steverado.TeamWorkApi.service.Impl;
 
+import com.steverado.TeamWorkApi.dtos.ArticleCommentItemsDto;
 import com.steverado.TeamWorkApi.dtos.ArticleDto;
+import com.steverado.TeamWorkApi.dtos.FeedItemDto;
 import com.steverado.TeamWorkApi.entity.Article;
+import com.steverado.TeamWorkApi.entity.ArticleComment;
 import com.steverado.TeamWorkApi.entity.User;
 import com.steverado.TeamWorkApi.enums.Role;
 import com.steverado.TeamWorkApi.repository.ArticleRepository;
 import com.steverado.TeamWorkApi.response.*;
+import com.steverado.TeamWorkApi.service.ArticleCommentService;
 import com.steverado.TeamWorkApi.service.ArticleService;
 import com.steverado.TeamWorkApi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +31,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Autowired
     private ArticleRepository articleRepository;
+
+    @Autowired
+    private ArticleCommentService articleCommentService;
 
     @Override
     public ResponseEntity<ArticleResponse<DataArticleResponse>> saveArticle(ArticleDto articleDto) {
@@ -149,5 +157,38 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public List<Article> getAllArticles() {
         return articleRepository.findAllArticles();
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<DataViewArticleResponse<List<ArticleCommentItemsDto>>>> getArticleAndCommentById(Long articleId) {
+
+        Optional<Article> article = getArticleById(articleId);
+
+        if (article.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        List<ArticleComment> comments = articleCommentService.getAllCommentsByArticleId(articleId);
+
+        List<ArticleCommentItemsDto> articleComments = new ArrayList<>();
+
+        comments.forEach(comment -> {  articleComments.add(
+                new ArticleCommentItemsDto(
+                        comment.getComment_id(),
+                        comment.getComment(),
+                        comment.getUser().getId()
+        ));
+        });
+
+
+        DataViewArticleResponse<List<ArticleCommentItemsDto>> data = new DataViewArticleResponse<List<ArticleCommentItemsDto>>();
+        data.setId(articleId);
+        data.setCreatedOn(article.get().getCreatedAt());
+        data.setTitle(article.get().getTitle());
+        data.setArticle(article.get().getContent());
+        data.setComments(articleComments);
+
+        ApiResponse<DataViewArticleResponse<List<ArticleCommentItemsDto>>> response = new ApiResponse<DataViewArticleResponse<List<ArticleCommentItemsDto>>>("success", data);
+        return ResponseEntity.ok(response);
     }
 }
