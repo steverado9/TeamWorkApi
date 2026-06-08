@@ -1,6 +1,6 @@
 package com.steverado.TeamWorkApi.controller;
 
-import com.steverado.TeamWorkApi.dtos.ArticleCommentItemsDto;
+import com.steverado.TeamWorkApi.dtos.CommentItemsDto;
 import com.steverado.TeamWorkApi.dtos.CommentDto;
 import com.steverado.TeamWorkApi.dtos.ArticleDto;
 import com.steverado.TeamWorkApi.entity.Article;
@@ -51,7 +51,7 @@ public class ArticleController {
     }
 
     @GetMapping("articles/{articleId}")
-    public ResponseEntity<ApiResponse<DataViewArticleResponse<List<ArticleCommentItemsDto>>>> viewArticle(@PathVariable Long articleId) {
+    public ResponseEntity<ApiResponse<DataViewArticleResponse<List<CommentItemsDto>>>> viewArticle(@PathVariable Long articleId) {
         return articleService.getArticleAndCommentById(articleId);
     }
 }

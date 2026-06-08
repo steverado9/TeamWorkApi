@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -32,4 +33,12 @@ public interface GifCommentRepository extends JpaRepository<GifComment, Long> {
             LIMIT 1
             """, nativeQuery = true)
     Optional<GifComment> getGifCommentByGifId(@Param("gifId") Long gifId);
+
+    @Query(value = """
+            SELECT * FROM gif_comments
+            WHERE gif_id = :gifId
+            ORDER BY comment_id DESC
+            """, nativeQuery = true)
+    List<GifComment> getAllCommentsByGifId(@Param("gifId") Long gifId);
+
 }

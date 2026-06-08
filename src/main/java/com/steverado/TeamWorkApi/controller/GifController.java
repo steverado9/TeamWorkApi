@@ -1,16 +1,16 @@
 package com.steverado.TeamWorkApi.controller;
 
 import com.steverado.TeamWorkApi.dtos.CommentDto;
+import com.steverado.TeamWorkApi.dtos.CommentItemsDto;
 import com.steverado.TeamWorkApi.dtos.GifDto;
-import com.steverado.TeamWorkApi.response.ApiResponse;
-import com.steverado.TeamWorkApi.response.DataGifCommentResponse;
-import com.steverado.TeamWorkApi.response.DataGifResponse;
-import com.steverado.TeamWorkApi.response.DeleteDataResponse;
+import com.steverado.TeamWorkApi.response.*;
 import com.steverado.TeamWorkApi.service.GifCommentService;
 import com.steverado.TeamWorkApi.service.GifService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class GifController {
@@ -36,5 +36,10 @@ public class GifController {
     @PostMapping("/gifs/{gifId}/comment")
     public ResponseEntity<ApiResponse<DataGifCommentResponse>> postComment( @PathVariable Long gifId, @RequestBody CommentDto commentDto) {
         return gifCommentService.postComment(gifId, commentDto);
+    }
+
+    @GetMapping("gifs/{gifId}")
+    public  ResponseEntity<ApiResponse<DataViewGifResponse<List<CommentItemsDto>>>> viewGif(@PathVariable Long gifId) {
+        return gifService.getGifAndCommentByGifId(gifId);
     }
 }

@@ -1,12 +1,14 @@
 package com.steverado.TeamWorkApi.service.Impl;
 
 import com.steverado.TeamWorkApi.dtos.CommentDto;
+import com.steverado.TeamWorkApi.dtos.CommentItemsDto;
 import com.steverado.TeamWorkApi.entity.Gif;
 import com.steverado.TeamWorkApi.entity.GifComment;
 import com.steverado.TeamWorkApi.entity.User;
 import com.steverado.TeamWorkApi.repository.GifCommentRepository;
 import com.steverado.TeamWorkApi.response.ApiResponse;
 import com.steverado.TeamWorkApi.response.DataGifCommentResponse;
+import com.steverado.TeamWorkApi.response.DataViewGifResponse;
 import com.steverado.TeamWorkApi.service.GifCommentService;
 import com.steverado.TeamWorkApi.service.GifService;
 import com.steverado.TeamWorkApi.service.UserService;
@@ -17,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -72,4 +75,6 @@ public class GifCommentServiceImpl implements GifCommentService {
         ApiResponse<DataGifCommentResponse> response = new ApiResponse<>("“success”", data);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+
 }

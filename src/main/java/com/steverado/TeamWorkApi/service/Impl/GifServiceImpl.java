@@ -1,13 +1,17 @@
 package com.steverado.TeamWorkApi.service.Impl;
 
+import com.steverado.TeamWorkApi.dtos.CommentItemsDto;
 import com.steverado.TeamWorkApi.dtos.GifDto;
-import com.steverado.TeamWorkApi.entity.Article;
+import com.steverado.TeamWorkApi.entity.ArticleComment;
 import com.steverado.TeamWorkApi.entity.Gif;
+import com.steverado.TeamWorkApi.entity.GifComment;
 import com.steverado.TeamWorkApi.entity.User;
 import com.steverado.TeamWorkApi.enums.Role;
+import com.steverado.TeamWorkApi.repository.GifCommentRepository;
 import com.steverado.TeamWorkApi.repository.GifRepository;
 import com.steverado.TeamWorkApi.response.ApiResponse;
 import com.steverado.TeamWorkApi.response.DataGifResponse;
+import com.steverado.TeamWorkApi.response.DataViewGifResponse;
 import com.steverado.TeamWorkApi.response.DeleteDataResponse;
 import com.steverado.TeamWorkApi.service.GifService;
 import com.steverado.TeamWorkApi.service.UserService;
@@ -29,6 +33,9 @@ public class GifServiceImpl implements GifService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private GifCommentRepository gifCommentRepository;
 
     @Override
     public ResponseEntity<ApiResponse<DataGifResponse>> saveGif(GifDto gifDto) {
@@ -112,5 +119,36 @@ public class GifServiceImpl implements GifService {
     @Override
     public List<Gif> getAllGifs() {
         return gifRepository.findAllGifs();
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<DataViewGifResponse<List<CommentItemsDto>>>> getGifAndCommentByGifId(Long id) {
+
+        Optional<Gif> gif = getGifById(id);
+
+        if (gif.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        List<GifComment> comments = gifCommentRepository.getAllCommentsByGifId(id);
+
+        List<CommentItemsDto> GifComments = comments.stream()
+                .map(comment -> new CommentItemsDto(
+                        comment.getComment_id(),
+                        comment.getComment(),
+                        comment.getUser().getId()
+                ))
+                .toList();
+
+        DataViewGifResponse<List<CommentItemsDto>> data = new DataViewGifResponse<>();
+        data.setId(gif.get().getId());
+        data.setCreatedOn(gif.get().getCreatedAt());
+        data.setTitle(gif.get().getTitle());
+        data.setUrl(gif.get().getImageUrl());
+        data.setComments(GifComments);
+
+        ApiResponse<DataViewGifResponse<List<CommentItemsDto>>> response = new ApiResponse<>("success", data);
+
+        return ResponseEntity.ok(response);
     }
 }

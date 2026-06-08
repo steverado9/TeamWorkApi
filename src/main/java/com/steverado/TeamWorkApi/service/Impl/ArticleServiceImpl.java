@@ -1,15 +1,14 @@
 package com.steverado.TeamWorkApi.service.Impl;
 
-import com.steverado.TeamWorkApi.dtos.ArticleCommentItemsDto;
+import com.steverado.TeamWorkApi.dtos.CommentItemsDto;
 import com.steverado.TeamWorkApi.dtos.ArticleDto;
-import com.steverado.TeamWorkApi.dtos.FeedItemDto;
 import com.steverado.TeamWorkApi.entity.Article;
 import com.steverado.TeamWorkApi.entity.ArticleComment;
 import com.steverado.TeamWorkApi.entity.User;
 import com.steverado.TeamWorkApi.enums.Role;
+import com.steverado.TeamWorkApi.repository.ArticleCommentRepository;
 import com.steverado.TeamWorkApi.repository.ArticleRepository;
 import com.steverado.TeamWorkApi.response.*;
-import com.steverado.TeamWorkApi.service.ArticleCommentService;
 import com.steverado.TeamWorkApi.service.ArticleService;
 import com.steverado.TeamWorkApi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,7 +31,7 @@ public class ArticleServiceImpl implements ArticleService {
     private ArticleRepository articleRepository;
 
     @Autowired
-    private ArticleCommentService articleCommentService;
+    private ArticleCommentRepository articleCommentRepository;
 
     @Override
     public ResponseEntity<ArticleResponse<DataArticleResponse>> saveArticle(ArticleDto articleDto) {
@@ -160,35 +158,34 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public ResponseEntity<ApiResponse<DataViewArticleResponse<List<ArticleCommentItemsDto>>>> getArticleAndCommentById(Long articleId) {
+    public ResponseEntity<ApiResponse<DataViewArticleResponse<List<CommentItemsDto>>>> getArticleAndCommentById(Long articleId) {
 
         Optional<Article> article = getArticleById(articleId);
 
         if (article.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        List<ArticleComment> comments = articleCommentService.getAllCommentsByArticleId(articleId);
+        List<ArticleComment> comments = articleCommentRepository.getAllCommentsByArticleId(articleId);
 
-        List<ArticleCommentItemsDto> articleComments = new ArrayList<>();
+        List<CommentItemsDto> articleComments =
+                comments.stream()
+                        .map(comment -> new CommentItemsDto(
+                                comment.getComment_id(),
+                                comment.getComment(),
+                                comment.getUser().getId()
+                        ))
+                        .toList();
 
-        comments.forEach(comment -> {  articleComments.add(
-                new ArticleCommentItemsDto(
-                        comment.getComment_id(),
-                        comment.getComment(),
-                        comment.getUser().getId()
-        ));
-        });
 
-
-        DataViewArticleResponse<List<ArticleCommentItemsDto>> data = new DataViewArticleResponse<List<ArticleCommentItemsDto>>();
-        data.setId(articleId);
+        DataViewArticleResponse<List<CommentItemsDto>> data = new DataViewArticleResponse<List<CommentItemsDto>>();
+        data.setId(article.get().getId());
         data.setCreatedOn(article.get().getCreatedAt());
         data.setTitle(article.get().getTitle());
         data.setArticle(article.get().getContent());
         data.setComments(articleComments);
 
-        ApiResponse<DataViewArticleResponse<List<ArticleCommentItemsDto>>> response = new ApiResponse<DataViewArticleResponse<List<ArticleCommentItemsDto>>>("success", data);
+        ApiResponse<DataViewArticleResponse<List<CommentItemsDto>>> response = new ApiResponse<DataViewArticleResponse<List<CommentItemsDto>>>("success", data);
         return ResponseEntity.ok(response);
     }
 }

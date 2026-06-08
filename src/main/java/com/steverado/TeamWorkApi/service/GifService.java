@@ -1,9 +1,11 @@
 package com.steverado.TeamWorkApi.service;
 
+import com.steverado.TeamWorkApi.dtos.CommentItemsDto;
 import com.steverado.TeamWorkApi.dtos.GifDto;
 import com.steverado.TeamWorkApi.entity.Gif;
 import com.steverado.TeamWorkApi.response.ApiResponse;
 import com.steverado.TeamWorkApi.response.DataGifResponse;
+import com.steverado.TeamWorkApi.response.DataViewGifResponse;
 import com.steverado.TeamWorkApi.response.DeleteDataResponse;
 import org.springframework.http.ResponseEntity;
 
@@ -18,4 +20,6 @@ public interface GifService {
     Optional<Gif> getGifById(Long id);
 
     List<Gif> getAllGifs();
+
+    ResponseEntity<ApiResponse<DataViewGifResponse<List<CommentItemsDto>>>> getGifAndCommentByGifId(Long id);
 }

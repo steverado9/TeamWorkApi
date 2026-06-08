@@ -1,14 +1,14 @@
 package com.steverado.TeamWorkApi.dtos;
 
-public class ArticleCommentItemsDto {
+public class CommentItemsDto {
     private Long commentId;
     private String comment;
     private Long authorId;
 
-    public ArticleCommentItemsDto() {
+    public CommentItemsDto() {
     }
 
-    public ArticleCommentItemsDto(Long commentId, String comment, Long authorId) {
+    public CommentItemsDto(Long commentId, String comment, Long authorId) {
         this.commentId = commentId;
         this.comment = comment;
         this.authorId = authorId;
