@@ -10,17 +10,20 @@ import com.steverado.TeamWorkApi.response.DataLoginResponse;
 import com.steverado.TeamWorkApi.service.AuthenticationService;
 import com.steverado.TeamWorkApi.service.JwtService;
 import com.steverado.TeamWorkApi.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("/auth")
 @RestController
+@RequestMapping("/auth")
+@Tag(name = "User Management", description = "Api for authenticating users")
 public class AuthenticationController {
     private final JwtService jwtService;
 
@@ -34,6 +37,13 @@ public class AuthenticationController {
         this.authenticationService = authenticationService;
     }
 
+    @Operation(summary = "register an Employee", description = "Add a new employee to the system")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Employee created successfully",
+            content = @Content(schema = @Schema(implementation = RegisterUserDto.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid response data",
+            content = @Content(schema = @Schema()))
+    })
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<DataCreateUserResponse>> register(@RequestBody RegisterUserDto registerUserDto) {
 
@@ -58,6 +68,14 @@ public class AuthenticationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+
+    @Operation(summary = "Sign in a user", description = "Login as an admin or employee")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User logged in successfully",
+                content = @Content(schema = @Schema(implementation = LoginUserDto.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Incorrect Username or password",
+                content = @Content(schema = @Schema()))
+    })
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<DataLoginResponse>> authenticate(@RequestBody LoginUserDto loginUserDto) {
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
