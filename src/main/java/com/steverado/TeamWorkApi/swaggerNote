@@ -1,0 +1,4 @@
+note: https://medium.com/javaguides/generate-rest-api-documentation-for-spring-boot-project-using-swagger-996e48fe0ceasawggerUrl: http://localhost:8080/swagger-ui/index.html
+add: OpenApiConfig class
+Swagger UI url: http://localhost:8080/swagger-ui/index.html
+OpenAPI JSON url: http://localhost:8080/v3/api-docs

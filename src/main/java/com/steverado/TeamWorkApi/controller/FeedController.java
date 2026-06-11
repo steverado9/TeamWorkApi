@@ -5,6 +5,7 @@ import com.steverado.TeamWorkApi.response.ApiResponse;
 import com.steverado.TeamWorkApi.service.FeedService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
+@SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Feed Management", description = "APIs For viewing articles and gifs in the Feed")
 public class FeedController {
 
