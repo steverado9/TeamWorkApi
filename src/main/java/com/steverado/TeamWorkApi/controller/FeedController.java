@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -27,7 +28,10 @@ public class FeedController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "View feed")
     })
     @GetMapping("/feed")
-    public ResponseEntity<ApiResponse<List<FeedItemDto>>> feed() {
-        return feedService.viewAllArticlesAndGifs();
+    public ResponseEntity<ApiResponse<List<FeedItemDto>>> feed(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return feedService.viewAllArticlesAndGifs(page, size);
     }
 }

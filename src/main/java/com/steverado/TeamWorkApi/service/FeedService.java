@@ -7,5 +7,5 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface FeedService {
-    ResponseEntity<ApiResponse<List<FeedItemDto>>> viewAllArticlesAndGifs();
+    ResponseEntity<ApiResponse<List<FeedItemDto>>> viewAllArticlesAndGifs(int page, int size);
 }

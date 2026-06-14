@@ -58,4 +58,5 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     @Query(value = "SELECT * FROM articles", nativeQuery = true)
     List<Article> findAllArticles();
+
 }

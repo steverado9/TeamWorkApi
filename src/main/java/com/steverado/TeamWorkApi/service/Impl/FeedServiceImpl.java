@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class FeedServiceImpl implements FeedService {
     private GifService gifService;
 
     @Override
-    public ResponseEntity<ApiResponse<List<FeedItemDto>>> viewAllArticlesAndGifs() {
+    public ResponseEntity<ApiResponse<List<FeedItemDto>>> viewAllArticlesAndGifs(int page, int size) {
         List<Article> articles = articleService.getAllArticles();
         List<Gif> gifs = gifService.getAllGifs();
 
@@ -51,11 +52,18 @@ public class FeedServiceImpl implements FeedService {
             ));
         });
 
-        System.out.println("feeds content -> :" + feed);
-
         feed.sort(Comparator.comparing(FeedItemDto::getCreatedOn).reversed());
 
-        ApiResponse<List<FeedItemDto>> response = new ApiResponse<>("success", feed);
+        int start = page * size;
+        int end = Math.min(start + size, feed.size());
+
+        if(start >= feed.size()) {
+            return ResponseEntity.ok(new ApiResponse<>("success", Collections.emptyList()));
+        }
+
+        List<FeedItemDto> paginatedFeed = feed.subList(start, end);
+
+        ApiResponse<List<FeedItemDto>> response = new ApiResponse<>("success", paginatedFeed);
 
         return ResponseEntity.ok(response);
     }
