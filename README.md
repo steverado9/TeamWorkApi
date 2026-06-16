@@ -70,7 +70,7 @@ logging:
 
 ```properties
 jwt.secret=your-secret-key
-jwt.expiration=86400000
+jwt.expiration=expiration-time
 ```
 
 ### Run the Application
@@ -185,7 +185,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET    | `/feed`  | View Feed   |
+| GET    | `/feed?page=1&size=5`  | View Feed   |
 
 ---
 

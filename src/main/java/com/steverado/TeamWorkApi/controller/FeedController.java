@@ -30,7 +30,7 @@ public class FeedController {
     @GetMapping("/feed")
     public ResponseEntity<ApiResponse<List<FeedItemDto>>> feed(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "5") int size) {
 
         return feedService.viewAllArticlesAndGifs(page, size);
     }

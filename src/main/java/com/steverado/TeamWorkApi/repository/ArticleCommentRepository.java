@@ -39,4 +39,12 @@ public interface ArticleCommentRepository extends JpaRepository<ArticleComment, 
             ORDER BY created_at DESC
             """, nativeQuery = true)
     List<ArticleComment> getAllCommentsByArticleId(@Param("articleId") Long articleId);
+
+    @Transactional
+    @Modifying
+    @Query(value = """
+            DELETE FROM article_comments
+            WHERE article_id = :articleId
+            """, nativeQuery = true)
+    void deleteCommentsByArticleId(@Param("articleId") Long gifId);
 }

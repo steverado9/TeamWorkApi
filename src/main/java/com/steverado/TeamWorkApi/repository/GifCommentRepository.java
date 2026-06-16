@@ -41,4 +41,12 @@ public interface GifCommentRepository extends JpaRepository<GifComment, Long> {
             """, nativeQuery = true)
     List<GifComment> getAllCommentsByGifId(@Param("gifId") Long gifId);
 
+    @Transactional
+    @Modifying
+    @Query(value = """
+            DELETE FROM gif_comments
+            WHERE gif_id = :gifId
+            """, nativeQuery = true)
+    void deleteCommentsWithGifId(@Param("gifId") Long gifId);
+
 }

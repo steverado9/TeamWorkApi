@@ -52,12 +52,12 @@ public class FeedServiceImpl implements FeedService {
             ));
         });
 
-        feed.sort(Comparator.comparing(FeedItemDto::getCreatedOn).reversed());
+        feed.sort(Comparator.comparing(FeedItemDto::getCreatedOn).reversed()); //sort the feed by created at and reverse it.
 
-        int start = page * size;
-        int end = Math.min(start + size, feed.size());
+        int start = page * size; //Calculate the start of the page
+        int end = Math.min(start + size, feed.size());  //Calculate the end of the page
 
-        if(start >= feed.size()) {
+        if(start >= feed.size()) { //This is used to check if the page exists
             return ResponseEntity.ok(new ApiResponse<>("success", Collections.emptyList()));
         }
 

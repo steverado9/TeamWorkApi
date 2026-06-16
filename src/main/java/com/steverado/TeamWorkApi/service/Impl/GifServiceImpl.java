@@ -101,6 +101,7 @@ public class GifServiceImpl implements GifService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
+        gifCommentRepository.deleteCommentsWithGifId(id);
         gifRepository.deleteGifById(id);
 
         DeleteDataResponse data = new DeleteDataResponse();

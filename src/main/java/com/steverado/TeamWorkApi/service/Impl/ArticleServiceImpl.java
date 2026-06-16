@@ -143,7 +143,9 @@ public class ArticleServiceImpl implements ArticleService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
+        articleCommentRepository.deleteCommentsByArticleId(articleId);
         articleRepository.deleteArticleById(articleId);
+
         DeleteDataResponse data = new DeleteDataResponse();
         data.setMessage("Article successfully deleted");
 
