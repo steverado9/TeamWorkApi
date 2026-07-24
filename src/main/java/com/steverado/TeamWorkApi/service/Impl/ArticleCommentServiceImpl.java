@@ -33,14 +33,9 @@ public class ArticleCommentServiceImpl implements ArticleCommentService {
     private UserService userService;
 
     @Override
-    public ResponseEntity<ApiResponse<DataArticleCommentResponse>> saveComment(Long articleId, CommentDto commentDto) {
+    public ResponseEntity<ApiResponse> saveComment(Long articleId, CommentDto commentDto) {
 
-        //get loggedin user
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        String email = authentication.getName();
-
-        Optional<User> currentUser = userService.findUserByEmail(email);
+        Optional<User> currentUser = articleService.authenticateUser();
 
         if (currentUser.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

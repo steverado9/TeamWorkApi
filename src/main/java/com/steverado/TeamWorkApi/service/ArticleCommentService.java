@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface ArticleCommentService {
-    ResponseEntity<ApiResponse<DataArticleCommentResponse>> saveComment(Long articleId, CommentDto commentDto);
+    ResponseEntity<ApiResponse> saveComment(Long articleId, CommentDto commentDto);
 
     List<ArticleComment> getAllCommentsByArticleId(Long articleId);
 }

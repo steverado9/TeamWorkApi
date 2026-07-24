@@ -35,14 +35,10 @@ public class GifCommentServiceImpl implements GifCommentService {
     private GifService gifService;
 
     @Override
-    public ResponseEntity<ApiResponse<DataGifCommentResponse>> postComment(Long gifId, CommentDto commentDto) {
+    public ResponseEntity<ApiResponse> postComment(Long gifId, CommentDto commentDto) {
 
         //get loggedin user
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        String email = authentication.getName();
-
-        Optional<User> currentUser = userService.findUserByEmail(email);
+        Optional<User> currentUser = gifService.authenticateUser();
 
         if (currentUser.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -75,6 +71,4 @@ public class GifCommentServiceImpl implements GifCommentService {
         ApiResponse<DataGifCommentResponse> response = new ApiResponse<>("“success”", data);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-
-
 }

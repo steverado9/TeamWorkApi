@@ -24,6 +24,7 @@ public class TeamWorkApiApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
+
 		if (userRepository.findByEmail("isaac.stephen@example.com").isEmpty()) {
 			String encodedPassword = passwordEncoder.encode("12345");
 

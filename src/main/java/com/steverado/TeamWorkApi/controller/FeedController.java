@@ -28,7 +28,7 @@ public class FeedController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "View feed")
     })
     @GetMapping("/feed")
-    public ResponseEntity<ApiResponse<List<FeedItemDto>>> feed(
+    public ResponseEntity<ApiResponse> feed(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
 

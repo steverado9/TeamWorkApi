@@ -28,8 +28,7 @@ public interface ArticleCommentRepository extends JpaRepository<ArticleComment, 
     @Query(value = """
             SELECT * FROM article_comments
             WHERE article_id = :articleId
-            ORDER BY comment_id DESC
-            LIMIT 1
+            AND comment_id = LAST_INSERT_ID();
             """, nativeQuery = true)
     Optional<ArticleComment> getArticleCommentByArticleId(@Param("articleId") Long articleId);
 

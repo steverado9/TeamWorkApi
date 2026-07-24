@@ -31,8 +31,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     @Query(value = """
             SELECT * FROM articles
             WHERE user_id = :userId
-            ORDER BY id DESC
-            LIMIT 1
+            AND id = LAST_INSERT_ID();
             """, nativeQuery = true)
     Optional<Article> findArticleByUserId(@Param("userId") Long userId);
 

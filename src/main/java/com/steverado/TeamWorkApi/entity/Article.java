@@ -1,6 +1,7 @@
 package com.steverado.TeamWorkApi.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -13,9 +14,11 @@ public class Article {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "title field should not be empty")
     @Column(name = "title", nullable = false)
     private String title;
 
+    @NotBlank(message = "content field should not be empty")
     @Column(name = "content", nullable = false , columnDefinition = "TEXT")
     private String content;
 

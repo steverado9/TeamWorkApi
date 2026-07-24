@@ -13,14 +13,17 @@ import com.steverado.TeamWorkApi.response.ApiResponse;
 import com.steverado.TeamWorkApi.response.DataGifResponse;
 import com.steverado.TeamWorkApi.response.DataViewGifResponse;
 import com.steverado.TeamWorkApi.response.DeleteDataResponse;
+import com.steverado.TeamWorkApi.service.CloudinaryService;
 import com.steverado.TeamWorkApi.service.GifService;
 import com.steverado.TeamWorkApi.service.UserService;
+import com.steverado.TeamWorkApi.util.FileUploadUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,22 +40,37 @@ public class GifServiceImpl implements GifService {
     @Autowired
     private GifCommentRepository gifCommentRepository;
 
-    @Override
-    public ResponseEntity<ApiResponse<DataGifResponse>> saveGif(GifDto gifDto) {
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
+    public Optional<User> authenticateUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         String email = authentication.getName();
 
-        Optional<User> currentUser = userService.findUserByEmail(email);
+        return userService.findUserByEmail(email);
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse> saveGif(GifDto gifDto, MultipartFile file) {
+
+        Optional<User> currentUser = authenticateUser();
 
         if (currentUser.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
+        if (file.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+        FileUploadUtil.assertAllowed(file, FileUploadUtil.IMAGE_PATTERN);
+
+        final String image_url = cloudinaryService.uploadFile(file);
+
         Gif gif = new Gif();
         gif.setTitle(gifDto.getTitle());
-        gif.setImageUrl(gifDto.getImageUrl());
+        gif.setImageUrl(image_url);
         gif.setUser(currentUser.get());
 
         gifRepository.saveGif(gif.getImageUrl(), gif.getTitle(), currentUser.get().getId());
@@ -76,13 +94,9 @@ public class GifServiceImpl implements GifService {
     }
 
     @Override
-    public ResponseEntity<ApiResponse<DeleteDataResponse>> deleteGifById(Long id) {
+    public ResponseEntity<ApiResponse> deleteGifById(Long id) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        String email = authentication.getName();
-
-        Optional<User> currentUser = userService.findUserByEmail(email);
+        Optional<User> currentUser = authenticateUser();
 
         if (currentUser.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -123,7 +137,7 @@ public class GifServiceImpl implements GifService {
     }
 
     @Override
-    public ResponseEntity<ApiResponse<DataViewGifResponse<List<CommentItemsDto>>>> getGifAndCommentByGifId(Long id) {
+    public ResponseEntity<ApiResponse> getGifAndCommentByGifId(Long id) {
 
         Optional<Gif> gif = getGifById(id);
 

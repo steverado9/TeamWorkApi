@@ -3,6 +3,7 @@ package com.steverado.TeamWorkApi.service;
 import com.steverado.TeamWorkApi.dtos.CommentItemsDto;
 import com.steverado.TeamWorkApi.dtos.ArticleDto;
 import com.steverado.TeamWorkApi.entity.Article;
+import com.steverado.TeamWorkApi.entity.User;
 import com.steverado.TeamWorkApi.response.*;
 import org.springframework.http.ResponseEntity;
 
@@ -10,17 +11,20 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ArticleService {
-    ResponseEntity<ArticleResponse<DataArticleResponse>> saveArticle(ArticleDto articleDto);
+
+    Optional<User> authenticateUser();
+
+    ResponseEntity<ApiResponse> saveArticle(ArticleDto articleDto);
 
     Optional<Article> getArticleById(Long articleId);
 
     Optional<Article> findArticleByUserId(Long userId);
 
-    ResponseEntity<ApiResponse<UpdateArticleDataResponse>> updateArticle(Long articleId, Article article);
+    ResponseEntity<ApiResponse> updateArticle(Long articleId, Article article);
 
-    ResponseEntity<ApiResponse<DeleteDataResponse>> deleteArticle(Long articleId);
+    ResponseEntity<ApiResponse> deleteArticle(Long articleId);
 
     List<Article> getAllArticles();
 
-    ResponseEntity<ApiResponse<DataViewArticleResponse<List<CommentItemsDto>>>> getArticleAndCommentById(Long articleId);
+    ResponseEntity<ApiResponse> getArticleAndCommentById(Long articleId);
 }

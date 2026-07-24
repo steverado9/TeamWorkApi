@@ -33,16 +33,21 @@ public class ArticleServiceImpl implements ArticleService {
     @Autowired
     private ArticleCommentRepository articleCommentRepository;
 
-    @Override
-    public ResponseEntity<ArticleResponse<DataArticleResponse>> saveArticle(ArticleDto articleDto) {
-
+    public Optional<User> authenticateUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         String email = authentication.getName();
 
-        Optional<User> currentUser = userService.findUserByEmail(email);
+        return userService.findUserByEmail(email);
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse> saveArticle(ArticleDto articleDto) {
+
+        Optional<User> currentUser = authenticateUser();
 
         if (currentUser.isEmpty()) {
+            System.out.println("Current user is empty" + currentUser.get());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
@@ -62,7 +67,7 @@ public class ArticleServiceImpl implements ArticleService {
         }
         data.setTitle(article.getTitle());
 
-        ArticleResponse<DataArticleResponse> response = new ArticleResponse<>(article.getTitle(), article.getContent(), "success", data);
+        ApiResponse<DataArticleResponse> response = new ApiResponse<>("success", data);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -79,13 +84,10 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public ResponseEntity<ApiResponse<UpdateArticleDataResponse>> updateArticle(Long articleId, Article article) {
+    public ResponseEntity<ApiResponse> updateArticle(Long articleId, Article article) {
+
         //get loggedin user
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        String email = authentication.getName();
-
-        Optional<User> currentUser = userService.findUserByEmail(email);
+        Optional<User> currentUser = authenticateUser();
 
         if (currentUser.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -118,13 +120,9 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public ResponseEntity<ApiResponse<DeleteDataResponse>> deleteArticle(Long articleId) {
+    public ResponseEntity<ApiResponse> deleteArticle(Long articleId) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        String email = authentication.getName();
-
-        Optional<User> currentUser = userService.findUserByEmail(email);
+        Optional<User> currentUser = authenticateUser();
 
         if (currentUser.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -161,7 +159,7 @@ public class ArticleServiceImpl implements ArticleService {
 
 
     @Override
-    public ResponseEntity<ApiResponse<DataViewArticleResponse<List<CommentItemsDto>>>> getArticleAndCommentById(Long articleId) {
+    public ResponseEntity<ApiResponse> getArticleAndCommentById(Long articleId) {
 
         Optional<Article> article = getArticleById(articleId);
 

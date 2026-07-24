@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,7 +43,7 @@ public class ArticleController {
                 content = @Content(schema = @Schema()))
     })
     @PostMapping("/articles")
-    public ResponseEntity<ArticleResponse<DataArticleResponse>> createArticle(@RequestBody ArticleDto articleDto) {
+    public ResponseEntity<ApiResponse> createArticle(@Valid @RequestBody ArticleDto articleDto) {
 
         return articleService.saveArticle(articleDto);
     }
@@ -55,7 +56,7 @@ public class ArticleController {
                 content = @Content(schema = @Schema()))
     })
     @PutMapping("/articles/{articleId}")
-    public ResponseEntity<ApiResponse<UpdateArticleDataResponse>> UpdateArticle(@PathVariable Long articleId, @RequestBody Article article) {
+    public ResponseEntity<ApiResponse> UpdateArticle(@PathVariable Long articleId,@Valid @RequestBody Article article) {
 
         return articleService.updateArticle(articleId, article);
     }
@@ -67,7 +68,7 @@ public class ArticleController {
                     content = @Content(schema = @Schema()))
     })
     @DeleteMapping("/articles/{articleId}")
-    public ResponseEntity<ApiResponse<DeleteDataResponse>> deleteArticle(@PathVariable Long articleId) {
+    public ResponseEntity<ApiResponse> deleteArticle(@PathVariable Long articleId) {
 
         return articleService.deleteArticle(articleId);
     }
@@ -75,13 +76,13 @@ public class ArticleController {
 
     @Operation(summary = "Post a comment", description = "Add a comment to the article using the articleId")
     @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "comment posted successfully",
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "comment posted successfully",
                     content = @Content(schema = @Schema(implementation = CommentDto.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data",
                     content = @Content(schema = @Schema()))
     })
     @PostMapping("articles/{articleId}/comment")
-    public ResponseEntity<ApiResponse<DataArticleCommentResponse>> addComment(@PathVariable Long articleId, @RequestBody CommentDto commentDto) {
+    public ResponseEntity<ApiResponse> addComment(@PathVariable Long articleId, @Valid @RequestBody CommentDto commentDto) {
 
         return articleCommentService.saveComment(articleId, commentDto);
     }
@@ -94,7 +95,7 @@ public class ArticleController {
                     content = @Content(schema = @Schema()))
     })
     @GetMapping("articles/{articleId}")
-    public ResponseEntity<ApiResponse<DataViewArticleResponse<List<CommentItemsDto>>>> viewArticle(@PathVariable Long articleId) {
+    public ResponseEntity<ApiResponse> viewArticle(@PathVariable Long articleId) {
         return articleService.getArticleAndCommentById(articleId);
     }
 }

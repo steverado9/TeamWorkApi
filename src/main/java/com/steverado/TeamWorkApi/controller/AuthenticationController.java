@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -40,14 +41,14 @@ public class AuthenticationController {
 
     @Operation(summary = "register an Employee", description = "Add a new employee to the system")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Employee created successfully",
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Employee created successfully",
             content = @Content(schema = @Schema(implementation = RegisterUserDto.class))),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid response data",
             content = @Content(schema = @Schema()))
     })
     @PostMapping("/signup")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<ApiResponse<DataCreateUserResponse>> register(@RequestBody RegisterUserDto registerUserDto) {
+    public ResponseEntity<ApiResponse<DataCreateUserResponse>> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -56,7 +57,7 @@ public class AuthenticationController {
         User currentUser = userService.findUserByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
 
         if (currentUser.getRole() != Role.ADMIN) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         User registeredUser = authenticationService.signup(registerUserDto);
@@ -79,7 +80,7 @@ public class AuthenticationController {
                 content = @Content(schema = @Schema()))
     })
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<DataLoginResponse>> authenticate(@RequestBody LoginUserDto loginUserDto) {
+    public ResponseEntity<ApiResponse> authenticate(@Valid @RequestBody LoginUserDto loginUserDto) {
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
 
         String jwtToken = jwtService.generateToken(authenticatedUser);

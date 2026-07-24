@@ -10,6 +10,6 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface GifCommentService {
-    ResponseEntity<ApiResponse<DataGifCommentResponse>> postComment(Long gifId, CommentDto commentDto);
+    ResponseEntity<ApiResponse> postComment(Long gifId, CommentDto commentDto);
 
 }
