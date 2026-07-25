@@ -4,6 +4,7 @@ import com.steverado.TeamWorkApi.dtos.CommentDto;
 import com.steverado.TeamWorkApi.entity.Article;
 import com.steverado.TeamWorkApi.entity.ArticleComment;
 import com.steverado.TeamWorkApi.entity.User;
+import com.steverado.TeamWorkApi.exceptions.ArticleNotFoundException;
 import com.steverado.TeamWorkApi.repository.ArticleCommentRepository;
 import com.steverado.TeamWorkApi.response.ApiResponse;
 import com.steverado.TeamWorkApi.response.DataArticleCommentResponse;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,25 +37,18 @@ public class ArticleCommentServiceImpl implements ArticleCommentService {
     @Override
     public ResponseEntity<ApiResponse> saveComment(Long articleId, CommentDto commentDto) {
 
-        Optional<User> currentUser = articleService.authenticateUser();
+        User currentUser = articleService.authenticateUser().orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
-        if (currentUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        Optional<Article> article = articleService.getArticleById(articleId);
-        if (article.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        Article article = articleService.getArticleById(articleId).orElseThrow(() -> new ArticleNotFoundException("article not found"));
 
         ArticleComment comment = new ArticleComment();
         comment.setComment(commentDto.getComment());
-        comment.setUser(currentUser.get());
-        comment.setArticle(article.get());
+        comment.setUser(currentUser);
+        comment.setArticle(article);
 
         articleCommentRepository.saveArticleComment(comment.getComment(), comment.getArticle().getId(), comment.getUser().getId());
 
-        Optional<ArticleComment> articleComment = articleCommentRepository.getArticleCommentByArticleId(article.get().getId());
+        Optional<ArticleComment> articleComment = articleCommentRepository.getArticleCommentByArticleId(article.getId());
 
         if (articleComment.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -62,8 +57,8 @@ public class ArticleCommentServiceImpl implements ArticleCommentService {
         DataArticleCommentResponse data = new DataArticleCommentResponse();
         data.setMessage("Comment successfully created");
         data.setCreatedOn(articleComment.get().getCreatedAt());
-        data.setArticleTitle(article.get().getTitle());
-        data.setArticle(article.get().getContent());
+        data.setArticleTitle(article.getTitle());
+        data.setArticle(article.getContent());
         data.setComment(articleComment.get().getComment());
 
         ApiResponse<DataArticleCommentResponse> response = new ApiResponse<DataArticleCommentResponse>("success", data);

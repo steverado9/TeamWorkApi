@@ -5,6 +5,7 @@ import com.steverado.TeamWorkApi.dtos.CommentItemsDto;
 import com.steverado.TeamWorkApi.entity.Gif;
 import com.steverado.TeamWorkApi.entity.GifComment;
 import com.steverado.TeamWorkApi.entity.User;
+import com.steverado.TeamWorkApi.exceptions.GifNotFoundException;
 import com.steverado.TeamWorkApi.repository.GifCommentRepository;
 import com.steverado.TeamWorkApi.response.ApiResponse;
 import com.steverado.TeamWorkApi.response.DataGifCommentResponse;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,21 +40,14 @@ public class GifCommentServiceImpl implements GifCommentService {
     public ResponseEntity<ApiResponse> postComment(Long gifId, CommentDto commentDto) {
 
         //get loggedin user
-        Optional<User> currentUser = gifService.authenticateUser();
+        User currentUser = gifService.authenticateUser().orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
-        if (currentUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        Optional<Gif> gif = gifService.getGifById(gifId);
-        if (gif.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        Gif gif = gifService.getGifById(gifId).orElseThrow(() -> new GifNotFoundException("Gif not found"));
 
         GifComment comment = new GifComment();
         comment.setComment(commentDto.getComment());
-        comment.setUser(currentUser.get());
-        comment.setGif(gif.get());
+        comment.setUser(currentUser);
+        comment.setGif(gif);
 
         gifCommentRepository.saveComment(comment.getComment(), comment.getUser().getId(), comment.getGif().getId());
 
@@ -65,7 +60,7 @@ public class GifCommentServiceImpl implements GifCommentService {
         DataGifCommentResponse data = new DataGifCommentResponse();
         data.setMessage("comment successfully created");
         data.setCreatedOn(gifComment.get().getCreatedAt());
-        data.setGifTitle(gif.get().getTitle());
+        data.setGifTitle(gif.getTitle());
         data.setComment(gifComment.get().getComment());
 
         ApiResponse<DataGifCommentResponse> response = new ApiResponse<>("“success”", data);

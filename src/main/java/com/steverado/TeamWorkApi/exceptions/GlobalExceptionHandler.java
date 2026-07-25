@@ -1,16 +1,49 @@
 package com.steverado.TeamWorkApi.exceptions;
 
+import com.steverado.TeamWorkApi.response.ApiResponse;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.nio.file.AccessDeniedException;
 
+@RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    String error = "error";
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ApiResponse> handleUserNotFound(UserNotFoundException exception) {
+
+        ApiResponse response = new ApiResponse<>(error, exception.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(ArticleNotFoundException.class)
+    public ResponseEntity<ApiResponse> handleArticleNotFound(ArticleNotFoundException exception) {
+
+        ApiResponse response  = new ApiResponse(error, exception.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(GifNotFoundException.class)
+    public ResponseEntity<ApiResponse> handleGifNotFound(GifNotFoundException exception) {
+
+        ApiResponse response = new ApiResponse<>(error, exception.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleSecureException(Exception exception) {
         ProblemDetail errorDetail = null;

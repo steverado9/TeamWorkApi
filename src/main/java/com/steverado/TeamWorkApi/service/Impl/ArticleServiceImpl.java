@@ -6,6 +6,7 @@ import com.steverado.TeamWorkApi.entity.Article;
 import com.steverado.TeamWorkApi.entity.ArticleComment;
 import com.steverado.TeamWorkApi.entity.User;
 import com.steverado.TeamWorkApi.enums.Role;
+import com.steverado.TeamWorkApi.exceptions.ArticleNotFoundException;
 import com.steverado.TeamWorkApi.repository.ArticleCommentRepository;
 import com.steverado.TeamWorkApi.repository.ArticleRepository;
 import com.steverado.TeamWorkApi.response.*;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,20 +46,16 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public ResponseEntity<ApiResponse> saveArticle(ArticleDto articleDto) {
 
-        Optional<User> currentUser = authenticateUser();
+        User currentUser = authenticateUser().orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
-        if (currentUser.isEmpty()) {
-            System.out.println("Current user is empty" + currentUser.get());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
 
         Article article = new Article();
         article.setTitle(articleDto.getTitle());
         article.setContent(articleDto.getContent());
-        article.setUser(currentUser.get());
+        article.setUser(currentUser);
         articleRepository.saveArticle(article.getTitle(), article.getContent(), article.getUser().getId());
 
-        Optional<Article> savedArticle = articleRepository.findArticleByUserId(currentUser.get().getId());
+        Optional<Article> savedArticle = articleRepository.findArticleByUserId(currentUser.getId());
 
         DataArticleResponse data = new DataArticleResponse();
         data.setMessage("Article successfully posted");
@@ -87,33 +85,27 @@ public class ArticleServiceImpl implements ArticleService {
     public ResponseEntity<ApiResponse> updateArticle(Long articleId, Article article) {
 
         //get loggedin user
-        Optional<User> currentUser = authenticateUser();
-
-        if (currentUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        User currentUser = authenticateUser().orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
         //get existing article with id
-        Optional<Article> existingArticle = getArticleById(articleId);
-        if (existingArticle.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        Article existingArticle = getArticleById(articleId).orElseThrow(() -> new ArticleNotFoundException("article not found"));
+
 
         //get user that created the article
-        User articleUser = existingArticle.get().getUser();
+        User articleUser = existingArticle.getUser();
 
-        if (currentUser.get().getRole() != Role.ADMIN && currentUser.get() != articleUser) {
+        if (currentUser.getRole() != Role.ADMIN && currentUser != articleUser) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        existingArticle.get().setTitle(article.getTitle());
-        existingArticle.get().setContent(article.getContent());
-        articleRepository.updateArticle(existingArticle.get().getTitle(),existingArticle.get().getContent(), existingArticle.get().getUser().getId());
+        existingArticle.setTitle(article.getTitle());
+        existingArticle.setContent(article.getContent());
+        articleRepository.updateArticle(existingArticle.getTitle(),existingArticle.getContent(), existingArticle.getUser().getId());
 
         UpdateArticleDataResponse data = new UpdateArticleDataResponse();
         data.setMessage("Article successfully updated");
-        data.setTitle(existingArticle.get().getTitle());
-        data.setArticle(existingArticle.get().getContent());
+        data.setTitle(existingArticle.getTitle());
+        data.setArticle(existingArticle.getContent());
 
         ApiResponse<UpdateArticleDataResponse> response = new ApiResponse<UpdateArticleDataResponse>("Success", data);
         return ResponseEntity.ok(response);
@@ -122,22 +114,16 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public ResponseEntity<ApiResponse> deleteArticle(Long articleId) {
 
-        Optional<User> currentUser = authenticateUser();
-
-        if (currentUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        User currentUser = authenticateUser().orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
         //get existing article with id
-        Optional<Article> existingArticle = getArticleById(articleId);
-        if (existingArticle.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        Article existingArticle = getArticleById(articleId).orElseThrow(() -> new ArticleNotFoundException("article not found"));
+
 
         //get user that created the article
-        User articleUser = existingArticle.get().getUser();
+        User articleUser = existingArticle.getUser();
 
-        if (currentUser.get().getRole() != Role.ADMIN && currentUser.get() != articleUser) {
+        if (currentUser.getRole() != Role.ADMIN && currentUser != articleUser) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -161,11 +147,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public ResponseEntity<ApiResponse> getArticleAndCommentById(Long articleId) {
 
-        Optional<Article> article = getArticleById(articleId);
-
-        if (article.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        Article article = getArticleById(articleId).orElseThrow(() -> new ArticleNotFoundException("article not found"));
 
         List<ArticleComment> comments = articleCommentRepository.getAllCommentsByArticleId(articleId);
 
@@ -180,10 +162,10 @@ public class ArticleServiceImpl implements ArticleService {
 
 
         DataViewArticleResponse<List<CommentItemsDto>> data = new DataViewArticleResponse<List<CommentItemsDto>>();
-        data.setId(article.get().getId());
-        data.setCreatedOn(article.get().getCreatedAt());
-        data.setTitle(article.get().getTitle());
-        data.setArticle(article.get().getContent());
+        data.setId(article.getId());
+        data.setCreatedOn(article.getCreatedAt());
+        data.setTitle(article.getTitle());
+        data.setArticle(article.getContent());
         data.setComments(articleComments);
 
         ApiResponse<DataViewArticleResponse<List<CommentItemsDto>>> response = new ApiResponse<DataViewArticleResponse<List<CommentItemsDto>>>("success", data);

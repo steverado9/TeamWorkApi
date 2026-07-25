@@ -7,6 +7,7 @@ import com.steverado.TeamWorkApi.entity.Gif;
 import com.steverado.TeamWorkApi.entity.GifComment;
 import com.steverado.TeamWorkApi.entity.User;
 import com.steverado.TeamWorkApi.enums.Role;
+import com.steverado.TeamWorkApi.exceptions.GifNotFoundException;
 import com.steverado.TeamWorkApi.repository.GifCommentRepository;
 import com.steverado.TeamWorkApi.repository.GifRepository;
 import com.steverado.TeamWorkApi.response.ApiResponse;
@@ -22,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -54,11 +56,8 @@ public class GifServiceImpl implements GifService {
     @Override
     public ResponseEntity<ApiResponse> saveGif(GifDto gifDto, MultipartFile file) {
 
-        Optional<User> currentUser = authenticateUser();
+        User currentUser = authenticateUser().orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
-        if (currentUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
 
         if (file.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -71,20 +70,17 @@ public class GifServiceImpl implements GifService {
         Gif gif = new Gif();
         gif.setTitle(gifDto.getTitle());
         gif.setImageUrl(image_url);
-        gif.setUser(currentUser.get());
+        gif.setUser(currentUser);
 
-        gifRepository.saveGif(gif.getImageUrl(), gif.getTitle(), currentUser.get().getId());
+        gifRepository.saveGif(gif.getImageUrl(), gif.getTitle(), currentUser.getId());
 
-        Optional<Gif> savedGif = gifRepository.findGifByUserId(currentUser.get().getId());
+        Gif savedGif = gifRepository.findGifByUserId(currentUser.getId()).orElseThrow(() -> new GifNotFoundException("Gif not found"));
 
         DataGifResponse data = new DataGifResponse();
-        if (savedGif.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
-        }
-        data.setGifId(savedGif.get().getId());
+        data.setGifId(savedGif.getId());
         data.setMessage("Gif Image Successfully Posted");
-        data.setCreatedOn(savedGif.get().getCreatedAt());
+        data.setCreatedOn(savedGif.getCreatedAt());
         data.setTitle(gif.getTitle());
         data.setImageUrl(gif.getImageUrl());
 
@@ -96,22 +92,15 @@ public class GifServiceImpl implements GifService {
     @Override
     public ResponseEntity<ApiResponse> deleteGifById(Long id) {
 
-        Optional<User> currentUser = authenticateUser();
-
-        if (currentUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        User currentUser = authenticateUser().orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
         //get existing gif with id
-        Optional<Gif> existingGif = getGifById(id);
-        if (existingGif.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        Gif existingGif = getGifById(id).orElseThrow(() -> new GifNotFoundException("Gif not found"));
 
         //get user that created the gif
-        User gifUser = existingGif.get().getUser();
+        User gifUser = existingGif.getUser();
 
-        if (currentUser.get().getRole() != Role.ADMIN && currentUser.get() != gifUser) {
+        if (currentUser.getRole() != Role.ADMIN && currentUser != gifUser) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -139,11 +128,7 @@ public class GifServiceImpl implements GifService {
     @Override
     public ResponseEntity<ApiResponse> getGifAndCommentByGifId(Long id) {
 
-        Optional<Gif> gif = getGifById(id);
-
-        if (gif.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        Gif gif = getGifById(id).orElseThrow(() -> new GifNotFoundException("Gif not found"));;
 
         List<GifComment> comments = gifCommentRepository.getAllCommentsByGifId(id);
 
@@ -156,10 +141,10 @@ public class GifServiceImpl implements GifService {
                 .toList();
 
         DataViewGifResponse<List<CommentItemsDto>> data = new DataViewGifResponse<>();
-        data.setId(gif.get().getId());
-        data.setCreatedOn(gif.get().getCreatedAt());
-        data.setTitle(gif.get().getTitle());
-        data.setUrl(gif.get().getImageUrl());
+        data.setId(gif.getId());
+        data.setCreatedOn(gif.getCreatedAt());
+        data.setTitle(gif.getTitle());
+        data.setUrl(gif.getImageUrl());
         data.setComments(GifComments);
 
         ApiResponse<DataViewGifResponse<List<CommentItemsDto>>> response = new ApiResponse<>("success", data);
