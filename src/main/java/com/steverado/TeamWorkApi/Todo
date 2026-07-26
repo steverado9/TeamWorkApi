@@ -1,4 +1,4 @@
--return the correct http status code. eg 201 for created.*
+-return the correct http status code. eg 201 for created.**
 -fix the ResponseEntity<> **
 API Response Specification
 {
@@ -7,7 +7,7 @@ API Response Specification
 }
 {
 “status”: “error”,
-“error” : “relevant-error-message”
+“error” : “relevant-error-message”**
 }
 -Use DTOs- Data transfer object: Never expose your entity in the controller.**
 -Use bean validation.**
@@ -16,8 +16,8 @@ API Response Specification
 -use cloudinary**
 -Use pagination when returning lots of data
 pagination is used to limit the number of data from a user requests.
--throw exceptions in the service
-If there are a bunch of exception, create a global exception class
+-throw exceptions in the service**
+If there are a bunch of exception, create a global exception class**
 -add logs, what is coming in and out
 -fix the repository
 -use postgres db

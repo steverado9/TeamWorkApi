@@ -37,7 +37,7 @@ public class GifController {
     })
     @PostMapping(value = "/gifs", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse> postGif(
-            @ModelAttribute GifDto gifDto,
+            @Valid @ModelAttribute GifDto gifDto,
             @RequestPart("file") MultipartFile file
     ) {
 

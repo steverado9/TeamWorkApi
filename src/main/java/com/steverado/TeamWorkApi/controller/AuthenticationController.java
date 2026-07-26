@@ -48,7 +48,7 @@ public class AuthenticationController {
     })
     @PostMapping("/signup")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<ApiResponse<DataCreateUserResponse>> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
+    public ResponseEntity<ApiResponse> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

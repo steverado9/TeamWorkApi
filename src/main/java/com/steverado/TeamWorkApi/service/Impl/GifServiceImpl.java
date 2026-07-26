@@ -8,6 +8,7 @@ import com.steverado.TeamWorkApi.entity.GifComment;
 import com.steverado.TeamWorkApi.entity.User;
 import com.steverado.TeamWorkApi.enums.Role;
 import com.steverado.TeamWorkApi.exceptions.GifNotFoundException;
+import com.steverado.TeamWorkApi.exceptions.NotAdminException;
 import com.steverado.TeamWorkApi.repository.GifCommentRepository;
 import com.steverado.TeamWorkApi.repository.GifRepository;
 import com.steverado.TeamWorkApi.response.ApiResponse;
@@ -58,11 +59,6 @@ public class GifServiceImpl implements GifService {
 
         User currentUser = authenticateUser().orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
-
-        if (file.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-
         FileUploadUtil.assertAllowed(file, FileUploadUtil.IMAGE_PATTERN);
 
         final String image_url = cloudinaryService.uploadFile(file);
@@ -101,7 +97,7 @@ public class GifServiceImpl implements GifService {
         User gifUser = existingGif.getUser();
 
         if (currentUser.getRole() != Role.ADMIN && currentUser != gifUser) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            throw new NotAdminException("FORBIDDEN!");
         }
 
         gifCommentRepository.deleteCommentsWithGifId(id);

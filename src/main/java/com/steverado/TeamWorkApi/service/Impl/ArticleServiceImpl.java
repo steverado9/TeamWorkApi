@@ -7,6 +7,7 @@ import com.steverado.TeamWorkApi.entity.ArticleComment;
 import com.steverado.TeamWorkApi.entity.User;
 import com.steverado.TeamWorkApi.enums.Role;
 import com.steverado.TeamWorkApi.exceptions.ArticleNotFoundException;
+import com.steverado.TeamWorkApi.exceptions.NotAdminException;
 import com.steverado.TeamWorkApi.repository.ArticleCommentRepository;
 import com.steverado.TeamWorkApi.repository.ArticleRepository;
 import com.steverado.TeamWorkApi.response.*;
@@ -90,12 +91,11 @@ public class ArticleServiceImpl implements ArticleService {
         //get existing article with id
         Article existingArticle = getArticleById(articleId).orElseThrow(() -> new ArticleNotFoundException("article not found"));
 
-
         //get user that created the article
         User articleUser = existingArticle.getUser();
 
         if (currentUser.getRole() != Role.ADMIN && currentUser != articleUser) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            throw new NotAdminException("FORBIDDEN!");
         }
 
         existingArticle.setTitle(article.getTitle());
@@ -124,7 +124,7 @@ public class ArticleServiceImpl implements ArticleService {
         User articleUser = existingArticle.getUser();
 
         if (currentUser.getRole() != Role.ADMIN && currentUser != articleUser) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            throw new NotAdminException("FORBIDDEN!");
         }
 
         articleCommentRepository.deleteCommentsByArticleId(articleId);

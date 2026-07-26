@@ -2,6 +2,7 @@ package com.steverado.TeamWorkApi.controller;
 
 import com.steverado.TeamWorkApi.entity.User;
 import com.steverado.TeamWorkApi.enums.Role;
+import com.steverado.TeamWorkApi.exceptions.NotAdminException;
 import com.steverado.TeamWorkApi.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -44,7 +45,7 @@ public class UserController {
         User currentUser = (User) authentication.getPrincipal();
 
         if (currentUser.getRole() != Role.ADMIN) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            throw new NotAdminException("FORBIDDEN!");
         }
 
         return ResponseEntity.ok(currentUser);
@@ -63,7 +64,7 @@ public class UserController {
         User currentUser = (User) authentication.getPrincipal();
 
         if (currentUser.getRole() != Role.ADMIN) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            throw new NotAdminException("FORBIDDEN!");
         }
 
         List<User> users = userService.allUsers();

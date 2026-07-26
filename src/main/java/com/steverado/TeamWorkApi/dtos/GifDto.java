@@ -7,14 +7,6 @@ public class GifDto {
     @NotBlank(message = "title field should not be empty")
     private String title;
 
-//    public String getImageUrl() {
-//        return imageUrl;
-//    }
-//
-//    public void setImageUrl(String imageUrl) {
-//        this.imageUrl = imageUrl;
-//    }
-
     public String getTitle() {
         return title;
     }
