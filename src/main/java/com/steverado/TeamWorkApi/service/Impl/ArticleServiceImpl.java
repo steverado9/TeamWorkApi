@@ -8,11 +8,15 @@ import com.steverado.TeamWorkApi.entity.User;
 import com.steverado.TeamWorkApi.enums.Role;
 import com.steverado.TeamWorkApi.exceptions.ArticleNotFoundException;
 import com.steverado.TeamWorkApi.exceptions.NotAdminException;
+import com.steverado.TeamWorkApi.mappers.ArticleMapper;
+import com.steverado.TeamWorkApi.mappers.CommentItemsMapper;
 import com.steverado.TeamWorkApi.repository.ArticleCommentRepository;
 import com.steverado.TeamWorkApi.repository.ArticleRepository;
 import com.steverado.TeamWorkApi.response.*;
 import com.steverado.TeamWorkApi.service.ArticleService;
 import com.steverado.TeamWorkApi.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +40,15 @@ public class ArticleServiceImpl implements ArticleService {
     @Autowired
     private ArticleCommentRepository articleCommentRepository;
 
+    @Autowired
+    private ArticleMapper articleMapper;
+
+    @Autowired
+    private CommentItemsMapper commentItemsMapper;
+
+    private static final Logger logger = LoggerFactory.getLogger(ArticleServiceImpl.class);
+
+
     public Optional<User> authenticateUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -47,17 +60,26 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public ResponseEntity<ApiResponse> saveArticle(ArticleDto articleDto) {
 
+        logger.trace("saving article");
+
+
+
+        logger.info("getting the logged in user : {}", authenticateUser());
+        logger.error("user not found");
         User currentUser = authenticateUser().orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
 
-        Article article = new Article();
-        article.setTitle(articleDto.getTitle());
-        article.setContent(articleDto.getContent());
+        logger.info("map the dto into an article : {}", articleMapper.toEntity(articleDto));
+        Article article = articleMapper.toEntity(articleDto);
         article.setUser(currentUser);
+
+        logger.debug("save article");
         articleRepository.saveArticle(article.getTitle(), article.getContent(), article.getUser().getId());
 
+        logger.info("getting the saved article {}", articleRepository.findArticleByUserId(currentUser.getId()));
         Optional<Article> savedArticle = articleRepository.findArticleByUserId(currentUser.getId());
 
+        logger.info("setting the data in the response");
         DataArticleResponse data = new DataArticleResponse();
         data.setMessage("Article successfully posted");
         if (savedArticle.isPresent()) {
@@ -66,6 +88,7 @@ public class ArticleServiceImpl implements ArticleService {
         }
         data.setTitle(article.getTitle());
 
+        logger.info("Api response");
         ApiResponse<DataArticleResponse> response = new ApiResponse<>("success", data);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -94,13 +117,14 @@ public class ArticleServiceImpl implements ArticleService {
         //get user that created the article
         User articleUser = existingArticle.getUser();
 
+        //if not admin
         if (currentUser.getRole() != Role.ADMIN && currentUser != articleUser) {
             throw new NotAdminException("FORBIDDEN!");
         }
 
         existingArticle.setTitle(article.getTitle());
         existingArticle.setContent(article.getContent());
-        articleRepository.updateArticle(existingArticle.getTitle(),existingArticle.getContent(), existingArticle.getUser().getId());
+        articleRepository.updateArticle(existingArticle.getTitle(),existingArticle.getContent(), articleUser.getId());
 
         UpdateArticleDataResponse data = new UpdateArticleDataResponse();
         data.setMessage("Article successfully updated");
@@ -153,11 +177,8 @@ public class ArticleServiceImpl implements ArticleService {
 
         List<CommentItemsDto> articleComments =
                 comments.stream()
-                        .map(comment -> new CommentItemsDto(
-                                comment.getComment_id(),
-                                comment.getComment(),
-                                comment.getUser().getId()
-                        ))
+                        //map each article comment to the standard response comment(CommentItemDto) using method reference
+                        .map(commentItemsMapper::articleComment)
                         .toList();
 
 

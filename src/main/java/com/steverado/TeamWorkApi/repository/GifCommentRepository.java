@@ -29,8 +29,7 @@ public interface GifCommentRepository extends JpaRepository<GifComment, Long> {
     @Query(value = """
             SELECT * FROM gif_comments
             WHERE gif_id = :gifId
-            ORDER BY comment_id DESC
-            LIMIT 1
+            AND id = LAST_INSERT_ID();
             """, nativeQuery = true)
     Optional<GifComment> getGifCommentByGifId(@Param("gifId") Long gifId);
 

@@ -3,6 +3,7 @@ package com.steverado.TeamWorkApi.service.Impl;
 import com.steverado.TeamWorkApi.dtos.FeedItemDto;
 import com.steverado.TeamWorkApi.entity.Article;
 import com.steverado.TeamWorkApi.entity.Gif;
+import com.steverado.TeamWorkApi.mappers.FeedMapper;
 import com.steverado.TeamWorkApi.response.ApiResponse;
 import com.steverado.TeamWorkApi.service.ArticleService;
 import com.steverado.TeamWorkApi.service.FeedService;
@@ -25,32 +26,45 @@ public class FeedServiceImpl implements FeedService {
     @Autowired
     private GifService gifService;
 
+    @Autowired
+    private FeedMapper feedMapper;
+
     @Override
     public ResponseEntity<ApiResponse> viewAllArticlesAndGifs(int page, int size) {
+        //get all the articles
         List<Article> articles = articleService.getAllArticles();
+        //get all the gifs
         List<Gif> gifs = gifService.getAllGifs();
 
+        //created an empty list
         List<FeedItemDto> feed = new ArrayList<>();
 
+        //used feedmapper to map the content of each article to the standard response feed article(FeedItemDto), then add it to the feed list
         articles.stream().forEach(article -> {
-            feed.add(new FeedItemDto(
-                    article.getId(),
-                    article.getTitle(),
-                    article.getContent(),
-                    article.getCreatedAt(),
-                    article.getUser().getId()
-            ));
+            feed.add(feedMapper.feedArticle(article));
         });
 
         gifs.forEach(gif -> {
-            feed.add(new FeedItemDto(
-                    gif.getId(),
-                    gif.getTitle(),
-                    gif.getImageUrl(),
-                    gif.getCreatedAt(),
-                    gif.getUser().getId()
-            ));
+            feed.add(feedMapper.feedGif(gif));
         });
+
+//        new FeedItemDto(
+//                article.getId(),
+//                article.getTitle(),
+//                article.getContent(),
+//                article.getCreatedAt(),
+//                article.getUser().getId()
+//        )
+//
+//        new FeedItemDto(
+//                gif.getId(),
+//                gif.getTitle(),
+//                gif.getImageUrl(),
+//                gif.getCreatedAt(),
+//                gif.getUser().getId()
+//        )
+
+
 
         feed.sort(Comparator.comparing(FeedItemDto::getCreatedOn).reversed()); //sort the feed by created at and reverse it.
 

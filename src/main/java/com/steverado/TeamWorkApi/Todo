@@ -14,13 +14,12 @@ API Response Specification
 -use @NotBlank for the dto field**
 -use @Valid for the request body in the controller**
 -use cloudinary**
--Use pagination when returning lots of data
+-Use pagination when returning lots of data**
 pagination is used to limit the number of data from a user requests.
 -throw exceptions in the service**
 If there are a bunch of exception, create a global exception class**
+-use mapstruct**
 -add logs, what is coming in and out
--fix the repository
--use postgres db
--use mapstruct
+
 
 

@@ -30,8 +30,7 @@ public interface GifRepository extends JpaRepository<Gif, Long> {
     @Query(value = """
             SELECT * FROM gifs
             WHERE user_id = :userId
-            ORDER BY id DESC
-            LIMIT 1
+            AND id = LAST_INSERT_ID();
             """, nativeQuery = true)
     Optional<Gif> findGifByUserId(@Param("userId") Long userId);
 

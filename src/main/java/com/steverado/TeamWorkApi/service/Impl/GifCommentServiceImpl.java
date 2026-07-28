@@ -6,6 +6,7 @@ import com.steverado.TeamWorkApi.entity.Gif;
 import com.steverado.TeamWorkApi.entity.GifComment;
 import com.steverado.TeamWorkApi.entity.User;
 import com.steverado.TeamWorkApi.exceptions.GifNotFoundException;
+import com.steverado.TeamWorkApi.mappers.CommentMapper;
 import com.steverado.TeamWorkApi.repository.GifCommentRepository;
 import com.steverado.TeamWorkApi.response.ApiResponse;
 import com.steverado.TeamWorkApi.response.DataGifCommentResponse;
@@ -36,6 +37,9 @@ public class GifCommentServiceImpl implements GifCommentService {
     @Autowired
     private GifService gifService;
 
+    @Autowired
+    private CommentMapper commentMapper;
+
     @Override
     public ResponseEntity<ApiResponse> postComment(Long gifId, CommentDto commentDto) {
 
@@ -44,8 +48,10 @@ public class GifCommentServiceImpl implements GifCommentService {
 
         Gif gif = gifService.getGifById(gifId).orElseThrow(() -> new GifNotFoundException("Gif not found"));
 
-        GifComment comment = new GifComment();
-        comment.setComment(commentDto.getComment());
+        //used commentMapper to insert the data from commentDto to the gif comment
+        GifComment comment = commentMapper.toGifCommentEntity(commentDto);
+
+        //the set the user and gif manually
         comment.setUser(currentUser);
         comment.setGif(gif);
 

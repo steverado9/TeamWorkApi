@@ -27,7 +27,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
             @Param("userId") Long userId
     );
 
-    //The highest ID is usually the newest record.
+    //The last inserted ID is usually the newest record.
     @Query(value = """
             SELECT * FROM articles
             WHERE user_id = :userId

@@ -9,6 +9,7 @@ import com.steverado.TeamWorkApi.entity.User;
 import com.steverado.TeamWorkApi.enums.Role;
 import com.steverado.TeamWorkApi.exceptions.GifNotFoundException;
 import com.steverado.TeamWorkApi.exceptions.NotAdminException;
+import com.steverado.TeamWorkApi.mappers.CommentItemsMapper;
 import com.steverado.TeamWorkApi.repository.GifCommentRepository;
 import com.steverado.TeamWorkApi.repository.GifRepository;
 import com.steverado.TeamWorkApi.response.ApiResponse;
@@ -45,6 +46,9 @@ public class GifServiceImpl implements GifService {
 
     @Autowired
     private CloudinaryService cloudinaryService;
+
+    @Autowired
+    private CommentItemsMapper commentItemsMapper;
 
     public Optional<User> authenticateUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -129,11 +133,8 @@ public class GifServiceImpl implements GifService {
         List<GifComment> comments = gifCommentRepository.getAllCommentsByGifId(id);
 
         List<CommentItemsDto> GifComments = comments.stream()
-                .map(comment -> new CommentItemsDto(
-                        comment.getComment_id(),
-                        comment.getComment(),
-                        comment.getUser().getId()
-                ))
+                //maps each comment to the standard response gif comment(CommentItemsDto) using method reference.
+                .map(commentItemsMapper::gifComment)
                 .toList();
 
         DataViewGifResponse<List<CommentItemsDto>> data = new DataViewGifResponse<>();

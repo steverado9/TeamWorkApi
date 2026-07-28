@@ -3,6 +3,7 @@ package com.steverado.TeamWorkApi.service.Impl;
 import com.steverado.TeamWorkApi.dtos.LoginUserDto;
 import com.steverado.TeamWorkApi.dtos.RegisterUserDto;
 import com.steverado.TeamWorkApi.entity.User;
+import com.steverado.TeamWorkApi.mappers.UserMapper;
 import com.steverado.TeamWorkApi.repository.UserRepository;
 import com.steverado.TeamWorkApi.service.AuthenticationService;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,24 +20,21 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
 
+    private final UserMapper userMapper;
 
-    public AuthenticationServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+    public AuthenticationServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
+        this.userMapper = userMapper;
     }
 
     @Override
     public User signup(RegisterUserDto input) {
-        User user = new User();
-        user.setFirstName(input.getFirstName());
-        user.setLastName(input.getLastName());
-        user.setEmail(input.getEmail());
-        user.setPassword(passwordEncoder.encode(input.getPassword()));
-        user.setRole(input.getRole());
-        user.setGender(input.getGender());
-        user.setAddress(input.getAddress());
-        user.setDepartment(input.getDepartment());
+        //used usermapper to map the content of each user input to the user entity
+        User user = userMapper.toUserEntity(input);
+        //manually encoded and added the password
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         userRepository.saveUser(
                 user.getFirstName(),

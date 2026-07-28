@@ -5,6 +5,7 @@ import com.steverado.TeamWorkApi.entity.Article;
 import com.steverado.TeamWorkApi.entity.ArticleComment;
 import com.steverado.TeamWorkApi.entity.User;
 import com.steverado.TeamWorkApi.exceptions.ArticleNotFoundException;
+import com.steverado.TeamWorkApi.mappers.CommentMapper;
 import com.steverado.TeamWorkApi.repository.ArticleCommentRepository;
 import com.steverado.TeamWorkApi.response.ApiResponse;
 import com.steverado.TeamWorkApi.response.DataArticleCommentResponse;
@@ -32,6 +33,9 @@ public class ArticleCommentServiceImpl implements ArticleCommentService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private CommentMapper commentMapper;
+
     @Override
     public ResponseEntity<ApiResponse> saveComment(Long articleId, CommentDto commentDto) {
 
@@ -39,8 +43,9 @@ public class ArticleCommentServiceImpl implements ArticleCommentService {
 
         Article article = articleService.getArticleById(articleId).orElseThrow(() -> new ArticleNotFoundException("article not found"));
 
-        ArticleComment comment = new ArticleComment();
-        comment.setComment(commentDto.getComment());
+        //used commentMapper to insert the data from commentDto to the article comment
+        ArticleComment comment = commentMapper.toArticleCommentEntity(commentDto);
+        //the set the user and article manually
         comment.setUser(currentUser);
         comment.setArticle(article);
 
