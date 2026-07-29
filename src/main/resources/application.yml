@@ -19,9 +19,16 @@ spring:
 
 logging:
   level:
+    root: INFO
+    com.steverado.TeamWorkApi: DEBUG
     org:
       springframework:
         security: DEBUG
+
+        logging:
+          level:
+            root: INFO
+            com.steverado.TeamWorkApi: DEBUG
 
 cloud_name: ${CLOUD_NAME}
 api_key: ${API_KEY}

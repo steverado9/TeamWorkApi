@@ -59,27 +59,20 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public ResponseEntity<ApiResponse> saveArticle(ArticleDto articleDto) {
+        logger.info("Received request to create article with title: {}", articleDto.getTitle());
 
-        logger.trace("saving article");
-
-
-
-        logger.info("getting the logged in user : {}", authenticateUser());
-        logger.error("user not found");
         User currentUser = authenticateUser().orElseThrow(() -> new UsernameNotFoundException("user not found"));
+        logger.info("Authenticated user: {} (id={})", currentUser.getEmail(), currentUser.getId());
 
-
-        logger.info("map the dto into an article : {}", articleMapper.toEntity(articleDto));
         Article article = articleMapper.toEntity(articleDto);
         article.setUser(currentUser);
 
-        logger.debug("save article");
+        logger.debug("Saving article '{}' for user {}", article.getTitle(), currentUser.getId());
         articleRepository.saveArticle(article.getTitle(), article.getContent(), article.getUser().getId());
 
-        logger.info("getting the saved article {}", articleRepository.findArticleByUserId(currentUser.getId()));
         Optional<Article> savedArticle = articleRepository.findArticleByUserId(currentUser.getId());
+        logger.info("Article saved successfully with id {}", savedArticle.map(Article::getId).orElse(null));
 
-        logger.info("setting the data in the response");
         DataArticleResponse data = new DataArticleResponse();
         data.setMessage("Article successfully posted");
         if (savedArticle.isPresent()) {
@@ -88,9 +81,9 @@ public class ArticleServiceImpl implements ArticleService {
         }
         data.setTitle(article.getTitle());
 
-        logger.info("Api response");
         ApiResponse<DataArticleResponse> response = new ApiResponse<>("success", data);
 
+        logger.info("Returning CREATED response for article '{}'", article.getTitle());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -107,12 +100,14 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public ResponseEntity<ApiResponse> updateArticle(Long articleId, Article article) {
+        logger.info("Received request to update article with title: {} (and id={})", article.getTitle(), articleId);
 
         //get loggedin user
         User currentUser = authenticateUser().orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
         //get existing article with id
         Article existingArticle = getArticleById(articleId).orElseThrow(() -> new ArticleNotFoundException("article not found"));
+        logger.info("Existing article: {}", existingArticle.getTitle());
 
         //get user that created the article
         User articleUser = existingArticle.getUser();
@@ -132,17 +127,21 @@ public class ArticleServiceImpl implements ArticleService {
         data.setArticle(existingArticle.getContent());
 
         ApiResponse<UpdateArticleDataResponse> response = new ApiResponse<UpdateArticleDataResponse>("Success", data);
+        logger.info("Returning UPDATED response for article '{}'", existingArticle.getTitle());
+
         return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<ApiResponse> deleteArticle(Long articleId) {
+        logger.info("Received request to delete article with id: {}", articleId);
 
         User currentUser = authenticateUser().orElseThrow(() -> new UsernameNotFoundException("user not found"));
+        logger.info("Authenticated user: {}", currentUser.getEmail());
 
         //get existing article with id
         Article existingArticle = getArticleById(articleId).orElseThrow(() -> new ArticleNotFoundException("article not found"));
-
+        logger.info("Existing article: {}", existingArticle.getTitle());
 
         //get user that created the article
         User articleUser = existingArticle.getUser();
@@ -151,6 +150,7 @@ public class ArticleServiceImpl implements ArticleService {
             throw new NotAdminException("FORBIDDEN!");
         }
 
+        logger.debug("deleting article '{}' with id {}", existingArticle.getTitle(), existingArticle.getId());
         articleCommentRepository.deleteCommentsByArticleId(articleId);
         articleRepository.deleteArticleById(articleId);
 
@@ -158,6 +158,7 @@ public class ArticleServiceImpl implements ArticleService {
         data.setMessage("Article successfully deleted");
 
         ApiResponse<DeleteDataResponse> response = new ApiResponse<>("Success", data);
+        logger.info("Returning DELETED response for article '{}'", existingArticle.getTitle());
 
         return ResponseEntity.ok(response);
     }
@@ -170,8 +171,10 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public ResponseEntity<ApiResponse> getArticleAndCommentById(Long articleId) {
+        logger.info("Get article and comments using article id: {}", articleId);
 
         Article article = getArticleById(articleId).orElseThrow(() -> new ArticleNotFoundException("article not found"));
+        logger.info("article title: {}", article.getTitle());
 
         List<ArticleComment> comments = articleCommentRepository.getAllCommentsByArticleId(articleId);
 
@@ -190,6 +193,8 @@ public class ArticleServiceImpl implements ArticleService {
         data.setComments(articleComments);
 
         ApiResponse<DataViewArticleResponse<List<CommentItemsDto>>> response = new ApiResponse<DataViewArticleResponse<List<CommentItemsDto>>>("success", data);
+        logger.info("Returning Article and comments response for article title '{}'", article.getTitle());
+
         return ResponseEntity.ok(response);
     }
 }

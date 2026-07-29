@@ -1,8 +1,11 @@
 package com.steverado.TeamWorkApi.exceptions;
 
 import com.steverado.TeamWorkApi.response.ApiResponse;
+import com.steverado.TeamWorkApi.service.Impl.ArticleServiceImpl;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AccountStatusException;
@@ -18,6 +21,9 @@ import java.nio.file.AccessDeniedException;
 public class GlobalExceptionHandler {
 
     String error = "error";
+
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
 
     @ExceptionHandler(NotAdminException.class)
     public ResponseEntity<ApiResponse> handleNotAdmin(NotAdminException exception) {
@@ -70,6 +76,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse> handleSecureException(Exception exception) {
+        logger.error("Unexpected error occurred", exception);
+
 
         ApiResponse response = null;
 
