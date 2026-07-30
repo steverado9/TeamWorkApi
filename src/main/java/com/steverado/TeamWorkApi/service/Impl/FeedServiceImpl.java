@@ -8,6 +8,8 @@ import com.steverado.TeamWorkApi.response.ApiResponse;
 import com.steverado.TeamWorkApi.service.ArticleService;
 import com.steverado.TeamWorkApi.service.FeedService;
 import com.steverado.TeamWorkApi.service.GifService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -29,8 +31,12 @@ public class FeedServiceImpl implements FeedService {
     @Autowired
     private FeedMapper feedMapper;
 
+    private static final Logger logger = LoggerFactory.getLogger(FeedServiceImpl.class);
+
     @Override
     public ResponseEntity<ApiResponse> viewAllArticlesAndGifs(int page, int size) {
+        logger.info("Received request to view articles and gifs with content size: {}", size);
+
         //get all the articles
         List<Article> articles = articleService.getAllArticles();
         //get all the gifs
@@ -48,24 +54,6 @@ public class FeedServiceImpl implements FeedService {
             feed.add(feedMapper.feedGif(gif));
         });
 
-//        new FeedItemDto(
-//                article.getId(),
-//                article.getTitle(),
-//                article.getContent(),
-//                article.getCreatedAt(),
-//                article.getUser().getId()
-//        )
-//
-//        new FeedItemDto(
-//                gif.getId(),
-//                gif.getTitle(),
-//                gif.getImageUrl(),
-//                gif.getCreatedAt(),
-//                gif.getUser().getId()
-//        )
-
-
-
         feed.sort(Comparator.comparing(FeedItemDto::getCreatedOn).reversed()); //sort the feed by created at and reverse it.
 
         int start = page * size; //Calculate the start of the page
@@ -76,6 +64,8 @@ public class FeedServiceImpl implements FeedService {
         }
 
         List<FeedItemDto> paginatedFeed = feed.subList(start, end);
+        logger.info("Received request to view articles and gifs with content size: {}", paginatedFeed);
+
 
         return ResponseEntity.ok( new ApiResponse<>("success", paginatedFeed));
     }

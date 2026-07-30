@@ -14,6 +14,8 @@ import com.steverado.TeamWorkApi.response.DataViewGifResponse;
 import com.steverado.TeamWorkApi.service.GifCommentService;
 import com.steverado.TeamWorkApi.service.GifService;
 import com.steverado.TeamWorkApi.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,11 +42,15 @@ public class GifCommentServiceImpl implements GifCommentService {
     @Autowired
     private CommentMapper commentMapper;
 
+    private static final Logger logger = LoggerFactory.getLogger(GifCommentServiceImpl.class);
+
     @Override
     public ResponseEntity<ApiResponse> postComment(Long gifId, CommentDto commentDto) {
+        logger.info("Received request to save comment in gif with gif id: {}", gifId);
 
         //get loggedin user
         User currentUser = gifService.authenticateUser().orElseThrow(() -> new UsernameNotFoundException("user not found"));
+        logger.info("Authenticated user: {} (id={})", currentUser.getEmail(), currentUser.getId());
 
         Gif gif = gifService.getGifById(gifId).orElseThrow(() -> new GifNotFoundException("Gif not found"));
 
@@ -55,9 +61,11 @@ public class GifCommentServiceImpl implements GifCommentService {
         comment.setUser(currentUser);
         comment.setGif(gif);
 
+        logger.debug("Saving comment for article '{}' comment {}", gif.getTitle(), comment.getComment());
         gifCommentRepository.saveComment(comment.getComment(), comment.getUser().getId(), comment.getGif().getId());
 
         Optional<GifComment> gifComment = gifCommentRepository.getGifCommentByGifId(gifId);
+        logger.info("Comment saved successfully with id {}", gifComment.get().getComment_id());
 
         if (gifComment.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -70,6 +78,8 @@ public class GifCommentServiceImpl implements GifCommentService {
         data.setComment(gifComment.get().getComment());
 
         ApiResponse<DataGifCommentResponse> response = new ApiResponse<>("“success”", data);
+        logger.info("Returning Saved comment response for article '{}'", gif.getTitle());
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

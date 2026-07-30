@@ -20,6 +20,8 @@ import com.steverado.TeamWorkApi.service.CloudinaryService;
 import com.steverado.TeamWorkApi.service.GifService;
 import com.steverado.TeamWorkApi.service.UserService;
 import com.steverado.TeamWorkApi.util.FileUploadUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,6 +52,8 @@ public class GifServiceImpl implements GifService {
     @Autowired
     private CommentItemsMapper commentItemsMapper;
 
+    private static final Logger logger = LoggerFactory.getLogger(GifServiceImpl.class);
+
     public Optional<User> authenticateUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -60,12 +64,15 @@ public class GifServiceImpl implements GifService {
 
     @Override
     public ResponseEntity<ApiResponse> saveGif(GifDto gifDto, MultipartFile file) {
+        logger.info("Received request to create gif with title: {}", gifDto.getTitle());
 
         User currentUser = authenticateUser().orElseThrow(() -> new UsernameNotFoundException("user not found"));
+        logger.info("Authenticated user: {} (id={})", currentUser.getEmail(), currentUser.getId());
 
         FileUploadUtil.assertAllowed(file, FileUploadUtil.IMAGE_PATTERN);
 
         final String image_url = cloudinaryService.uploadFile(file);
+        logger.info("image url: {}", image_url);
 
         Gif gif = new Gif();
         gif.setTitle(gifDto.getTitle());
@@ -85,14 +92,17 @@ public class GifServiceImpl implements GifService {
         data.setImageUrl(gif.getImageUrl());
 
         ApiResponse<DataGifResponse> response = new ApiResponse<DataGifResponse>("Success", data);
+        logger.info("Returning CREATED response for article '{}'", gif.getTitle());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Override
     public ResponseEntity<ApiResponse> deleteGifById(Long id) {
+        logger.info("Received request to delete gif with id: {}", id);
 
         User currentUser = authenticateUser().orElseThrow(() -> new UsernameNotFoundException("user not found"));
+        logger.info("Authenticated user: {}", currentUser.getEmail());
 
         //get existing gif with id
         Gif existingGif = getGifById(id).orElseThrow(() -> new GifNotFoundException("Gif not found"));
@@ -104,6 +114,7 @@ public class GifServiceImpl implements GifService {
             throw new NotAdminException("FORBIDDEN!");
         }
 
+        logger.debug("deleting gif '{}' with id {}", existingGif.getTitle(), existingGif.getId());
         gifCommentRepository.deleteCommentsWithGifId(id);
         gifRepository.deleteGifById(id);
 
@@ -111,6 +122,7 @@ public class GifServiceImpl implements GifService {
         data.setMessage("gif post successfully deleted");
 
         ApiResponse<DeleteDataResponse> response = new ApiResponse<>("Success", data);
+        logger.info("Returning DELETED response for article '{}'", existingGif.getTitle());
 
         return ResponseEntity.ok(response);
     }
@@ -127,8 +139,11 @@ public class GifServiceImpl implements GifService {
 
     @Override
     public ResponseEntity<ApiResponse> getGifAndCommentByGifId(Long id) {
+        logger.info("Get gif and comments using article id: {}", id);
 
-        Gif gif = getGifById(id).orElseThrow(() -> new GifNotFoundException("Gif not found"));;
+        Gif gif = getGifById(id).orElseThrow(() -> new GifNotFoundException("Gif not found"));
+        logger.info("gif title: {}", gif.getTitle());
+
 
         List<GifComment> comments = gifCommentRepository.getAllCommentsByGifId(id);
 
@@ -145,6 +160,7 @@ public class GifServiceImpl implements GifService {
         data.setComments(GifComments);
 
         ApiResponse<DataViewGifResponse<List<CommentItemsDto>>> response = new ApiResponse<>("success", data);
+        logger.info("Returning Gif and comments response for gif title '{}'", gif.getTitle());
 
         return ResponseEntity.ok(response);
     }

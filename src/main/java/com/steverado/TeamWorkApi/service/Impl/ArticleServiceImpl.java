@@ -48,7 +48,6 @@ public class ArticleServiceImpl implements ArticleService {
 
     private static final Logger logger = LoggerFactory.getLogger(ArticleServiceImpl.class);
 
-
     public Optional<User> authenticateUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -71,14 +70,12 @@ public class ArticleServiceImpl implements ArticleService {
         articleRepository.saveArticle(article.getTitle(), article.getContent(), article.getUser().getId());
 
         Optional<Article> savedArticle = articleRepository.findArticleByUserId(currentUser.getId());
-        logger.info("Article saved successfully with id {}", savedArticle.map(Article::getId).orElse(null));
+        logger.info("Article saved successfully with id {}", savedArticle.get().getId());
 
         DataArticleResponse data = new DataArticleResponse();
         data.setMessage("Article successfully posted");
-        if (savedArticle.isPresent()) {
-            data.setArticleId(savedArticle.get().getId());
-            data.setCreatedOn(savedArticle.get().getCreatedAt());
-        }
+        data.setArticleId(savedArticle.get().getId());
+        data.setCreatedOn(savedArticle.get().getCreatedAt());
         data.setTitle(article.getTitle());
 
         ApiResponse<DataArticleResponse> response = new ApiResponse<>("success", data);
@@ -107,7 +104,6 @@ public class ArticleServiceImpl implements ArticleService {
 
         //get existing article with id
         Article existingArticle = getArticleById(articleId).orElseThrow(() -> new ArticleNotFoundException("article not found"));
-        logger.info("Existing article: {}", existingArticle.getTitle());
 
         //get user that created the article
         User articleUser = existingArticle.getUser();

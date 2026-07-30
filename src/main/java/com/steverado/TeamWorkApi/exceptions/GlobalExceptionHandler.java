@@ -25,6 +25,14 @@ public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
 
+    @ExceptionHandler(AuthHeaderNotFoundException.class)
+    public ResponseEntity<ApiResponse> handleNoBearerAuth(AuthHeaderNotFoundException exception) {
+
+        ApiResponse response = new ApiResponse<>(error, exception.getMessage());
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
     @ExceptionHandler(NotAdminException.class)
     public ResponseEntity<ApiResponse> handleNotAdmin(NotAdminException exception) {
 

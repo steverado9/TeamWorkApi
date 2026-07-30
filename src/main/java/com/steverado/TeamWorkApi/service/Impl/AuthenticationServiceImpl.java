@@ -5,7 +5,10 @@ import com.steverado.TeamWorkApi.dtos.RegisterUserDto;
 import com.steverado.TeamWorkApi.entity.User;
 import com.steverado.TeamWorkApi.mappers.UserMapper;
 import com.steverado.TeamWorkApi.repository.UserRepository;
+import com.steverado.TeamWorkApi.service.ArticleCommentService;
 import com.steverado.TeamWorkApi.service.AuthenticationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +25,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final UserMapper userMapper;
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
+
+
     public AuthenticationServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -31,6 +37,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public User signup(RegisterUserDto input) {
+        logger.info("Received request to register a user with name: {}", input.getFirstName() + " " + input.getLastName());
+
         //used usermapper to map the content of each user input to the user entity
         User user = userMapper.toUserEntity(input);
         //manually encoded and added the password
@@ -46,8 +54,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 user.getDepartment(),
                 user.getAddress()
         );
+        User savedUser = userRepository.findByEmail(user.getEmail()).get();
+        logger.info("Returning registered user wirth id '{}'", savedUser.getId());
 
-        return userRepository.findByEmail(user.getEmail()).get();
+        return savedUser;
     }
 
     @Override
