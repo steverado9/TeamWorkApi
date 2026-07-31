@@ -4,10 +4,12 @@ import com.steverado.TeamWorkApi.dtos.LoginUserDto;
 import com.steverado.TeamWorkApi.dtos.RegisterUserDto;
 import com.steverado.TeamWorkApi.entity.User;
 import com.steverado.TeamWorkApi.enums.Role;
+import com.steverado.TeamWorkApi.exceptions.UserNotFoundException;
 import com.steverado.TeamWorkApi.response.ApiResponse;
 import com.steverado.TeamWorkApi.response.DataCreateUserResponse;
 import com.steverado.TeamWorkApi.response.DataLoginResponse;
 import com.steverado.TeamWorkApi.service.AuthenticationService;
+import com.steverado.TeamWorkApi.service.Impl.AuthenticationServiceImpl;
 import com.steverado.TeamWorkApi.service.JwtService;
 import com.steverado.TeamWorkApi.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +19,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -32,6 +36,8 @@ public class AuthenticationController {
     private final UserService userService;
 
     private final AuthenticationService authenticationService;
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
 
     public AuthenticationController(JwtService jwtService, UserService userService, AuthenticationService authenticationService) {
         this.jwtService = jwtService;
@@ -54,7 +60,7 @@ public class AuthenticationController {
 
         String email = authentication.getName();
 
-        User currentUser = userService.findUserByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        User currentUser = userService.findUserByEmail(email).orElseThrow(() -> new UserNotFoundException("User not found"));
 
         if (currentUser.getRole() != Role.ADMIN) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -81,9 +87,14 @@ public class AuthenticationController {
     })
     @PostMapping("/login")
     public ResponseEntity<ApiResponse> authenticate(@Valid @RequestBody LoginUserDto loginUserDto) {
+        logger.info("authenticate email and password request : {}", loginUserDto.getEmail() + " " + loginUserDto.getPassword());
+
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
+        logger.info("authenticated user's name: {}", authenticatedUser.getFirstName() + " " + authenticatedUser.getLastName());
 
         String jwtToken = jwtService.generateToken(authenticatedUser);
+        logger.info("jwt Token: {}", jwtToken );
+
 
         DataLoginResponse data = new DataLoginResponse();
         data.setToken(jwtToken);

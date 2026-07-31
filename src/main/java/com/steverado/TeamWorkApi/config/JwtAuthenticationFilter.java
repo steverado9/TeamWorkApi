@@ -1,6 +1,4 @@
 package com.steverado.TeamWorkApi.config;
-
-import com.steverado.TeamWorkApi.exceptions.AuthHeaderNotFoundException;
 import com.steverado.TeamWorkApi.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -16,9 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
-import javax.security.sasl.AuthenticationException;
 import java.io.IOException;
-import java.util.logging.Handler;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -39,7 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
-            throw new AuthHeaderNotFoundException("Jwt token cannot be empty");
+            return;
         }
 
         try {

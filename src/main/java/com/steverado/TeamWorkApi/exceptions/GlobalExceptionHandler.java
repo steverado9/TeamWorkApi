@@ -1,13 +1,13 @@
 package com.steverado.TeamWorkApi.exceptions;
 
 import com.steverado.TeamWorkApi.response.ApiResponse;
-import com.steverado.TeamWorkApi.service.Impl.ArticleServiceImpl;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -25,18 +25,10 @@ public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
 
-    @ExceptionHandler(AuthHeaderNotFoundException.class)
-    public ResponseEntity<ApiResponse> handleNoBearerAuth(AuthHeaderNotFoundException exception) {
-
-        ApiResponse response = new ApiResponse<>(error, exception.getMessage());
-
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-    }
-
     @ExceptionHandler(NotAdminException.class)
     public ResponseEntity<ApiResponse> handleNotAdmin(NotAdminException exception) {
 
-        ApiResponse response = new ApiResponse<>(error, "FORBIDDEN!");
+        ApiResponse response = new ApiResponse<>(error, exception.getMessage());
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
@@ -80,7 +72,13 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException exception) {
 
+        ApiResponse response = new ApiResponse<>(error, "Send the right http request in the body");
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse> handleSecureException(Exception exception) {

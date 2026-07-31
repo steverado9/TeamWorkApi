@@ -37,7 +37,7 @@ public class ArticleController {
 
     @Operation(summary = "Post an article", description = "Add a new article to the feed")
     @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "article posted successfully",
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "article posted successfully",
                 content = @Content(schema = @Schema(implementation = ArticleDto.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data",
                 content = @Content(schema = @Schema()))

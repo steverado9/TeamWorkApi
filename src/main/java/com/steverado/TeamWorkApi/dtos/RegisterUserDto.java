@@ -3,6 +3,7 @@ package com.steverado.TeamWorkApi.dtos;
 import com.steverado.TeamWorkApi.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public class RegisterUserDto {
 
@@ -22,7 +23,7 @@ public class RegisterUserDto {
     @NotBlank(message = "gender field should not be empty")
     private String gender;
 
-    @NotBlank(message = "role field should not be empty")
+    @NotNull(message = "role field should not be empty")
     private Role role;
 
     @NotBlank(message = "department field should not be empty")
